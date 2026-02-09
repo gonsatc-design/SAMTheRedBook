@@ -1,4 +1,16 @@
 require('dotenv').config();
+// --- INICIO DIAGNÓSTICO (AÑADIR ESTO) ---
+console.log("🔍 DIAGNÓSTICO DE VARIABLES:");
+console.log("   -> SUPABASE_URL:", process.env.SUPABASE_URL ? "✅ DETECTADA" : "❌ VACÍA (Culpable)");
+console.log("   -> SUPABASE_KEY:", process.env.SUPABASE_KEY ? "✅ DETECTADA" : "❌ VACÍA");
+console.log("   -> GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "✅ DETECTADA" : "❌ VACÍA");
+
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+    console.error("🔥 ERROR CRÍTICO: El archivo .env no se está leyendo o faltan claves.");
+    process.exit(1); // Matamos el servidor aquí para que no explote después
+}
+// --- FIN DIAGNÓSTICO ---
+
 const express = require('express');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { createClient } = require('@supabase/supabase-js');
@@ -237,8 +249,25 @@ app.post('/api/gandalf/judge', authMiddleware, async (req, res) => {
 });
 
 
+// ---------------------------------------------------------
+// 🚀 ARRANQUE BLINDADO
+// ---------------------------------------------------------
 if (require.main === module) {
-  app.listen(PORT, () => console.log(`🚀 S.A.M. Listo en http://localhost:${PORT}`));
+    const server = app.listen(PORT, () => {
+        console.log(`\n🚀 S.A.M. OPERATIVO Y VIGILANDO EN PUERTO ${PORT}`);
+        console.log("📝 Esperando órdenes... (Presiona Ctrl + C para detener)\n");
+    });
+
+    // 🚨 DETECTAR ERRORES DE PUERTO (EADDRINUSE)
+    server.on('error', (e) => {
+        if (e.code === 'EADDRINUSE') {
+            console.error(`\n❌ ERROR CRÍTICO: El puerto ${PORT} está ocupado.`);
+            console.error("💡 SOLUCIÓN: Ejecuta 'taskkill /F /IM node.exe' en la terminal para matar procesos viejos.\n");
+        } else {
+            console.error("❌ ERROR DEL SERVIDOR:", e);
+        }
+        process.exit(1);
+    });
 }
 
 module.exports = { app, authMiddleware };
