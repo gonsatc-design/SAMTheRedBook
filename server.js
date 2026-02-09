@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { createClient } = require('@supabase/supabase-js');
+const { calcularHorda } = require('./horda');
 
 const app = express();
 app.use(express.json());
@@ -44,10 +45,34 @@ function normalizarCategoria(catIA) {
     return encontrada ? encontrada : categoriaPorDefecto;
 }
 
-app.post('/api/briefing', async (req, res) => {
+
+// --- MIDDLEWARE DE AUTENTICACIÓN ---
+const authMiddleware = async (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1]; // Bearer <token>
+
+    if (!token) {
+        return res.status(401).json({ error: 'Acceso denegado. Se requiere un Sello del Rey (JWT).' });
+    }
+
+    try {
+        const { data: { user }, error } = await supabase.auth.getUser(token);
+
+        if (error || !user) {
+            return res.status(401).json({ error: 'Sello del Rey (JWT) inválido o expirado. Acceso denegado.' });
+        }
+
+        req.user = user;
+        next();
+    } catch (error) {
+        res.status(500).json({ error: 'Error interno al validar el Sello del Rey.' });
+    }
+};
+
+app.post('/api/briefing', authMiddleware, async (req, res) => {
     const { userInput } = req.body;
     console.log("------------------------------------------------");
     console.log("📩 INPUT:", userInput);
+    console.log("👤 USER:", req.user.id);
 
     try {
         // --- PROMPT DE FANTASÍA PURA ---
@@ -83,7 +108,7 @@ app.post('/api/briefing', async (req, res) => {
             console.log(`🔍 Categoria IA: "${g.categoria}" -> Supabase: "${catSegura}"`);
             
             return {
-                user_id: null,
+                user_id: req.user.id,
                 titulo_original: userInput,
                 titulo_epico: g.mision,
                 categoria: catSegura, // Usamos la versión blindada
@@ -127,19 +152,32 @@ const PORT = 3000;
 
 
 // --- RUTA PARA LEER EL LIBRO (Obtener Misiones) ---
-app.get('/api/tasks', async (req, res) => {
+app.get('/api/tasks', authMiddleware, async (req, res) => {
     try {
-        // Pedimos a Supabase todas las tareas que NO estén completadas
+        // Pedimos a Supabase las tareas del usuario autenticado que NO estén completadas
         // Ordenadas por las más recientes primero
         const { data, error } = await supabase
             .from('tasks')
             .select('*')
+            .eq('user_id', req.user.id)
             .eq('is_completed', false) 
             .order('created_at', { ascending: false });
 
         if (error) throw error;
 
-        res.json({ success: true, tasks: data });
+        // --- MOTOR DE ASEDIO ---
+        // Para cada tarea, calculamos la horda basándonos en su `failed_at`
+        const fechaReferencia = new Date(); // Usamos la fecha actual del servidor
+        const tasksConHorda = data.map(task => {
+            // Si la tarea nunca ha fallado (failed_at es null), no hay horda.
+            if (!task.failed_at) {
+                return { ...task, horda: { exploradores: 0, orcos: 0, urukhai: 0 } };
+            }
+            const horda = calcularHorda(task.failed_at, fechaReferencia);
+            return { ...task, horda };
+        });
+
+        res.json({ success: true, tasks: tasksConHorda });
 
     } catch (error) {
         console.error("❌ Error leyendo el libro:", error.message);
@@ -150,4 +188,57 @@ app.get('/api/tasks', async (req, res) => {
 
 
 
-app.listen(PORT, () => console.log(`🚀 S.A.M. Listo en http://localhost:${PORT}`));
+// --- RUTA DEL JUICIO DE GANDALF (FIN DE CICLO) ---
+app.post('/api/gandalf/judge', authMiddleware, async (req, res) => {
+    const { successIds = [], failureIds = [] } = req.body;
+    const userId = req.user.id;
+
+    try {
+        // Lógica para las gestas exitosas (Loot)
+        if (successIds.length > 0) {
+            const { error: successError } = await supabase
+                .from('tasks')
+                .update({ is_completed: true, fallo_confirmado: false }) // Se completa la misión
+                .in('id', successIds)
+                .eq('user_id', userId);
+
+            if (successError) {
+                console.error("Error al procesar el éxito:", successError.message);
+                throw new Error(`Fallo al registrar el éxito: ${successError.message}`);
+            }
+        }
+
+        // Lógica para las gestas fracasadas (Semilla de la Horda)
+        if (failureIds.length > 0) {
+            const { error: failureError } = await supabase
+                .from('tasks')
+                .update({ 
+                    is_completed: false, 
+                    fallo_confirmado: true,
+                    failed_at: new Date().toISOString() // ¡La Horda comienza a crecer desde AHORA!
+                })
+                .in('id', failureIds)
+                .eq('user_id', userId);
+            
+            if (failureError) {
+                console.error("Error al procesar el fracaso:", failureError.message);
+                throw new Error(`Fallo al registrar el fracaso: ${failureError.message}`);
+            }
+        }
+
+        res.json({ 
+            success: true, 
+            message: "El juicio de Mithrandir ha concluido. El destino de las gestas ha sido sellado." 
+        });
+
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`🚀 S.A.M. Listo en http://localhost:${PORT}`));
+}
+
+module.exports = { app, authMiddleware };
