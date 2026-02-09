@@ -1,57 +1,69 @@
 const request = require('supertest');
-const { app } = require('../server'); // Importamos la app
-const server = require('../server'); // Y el módulo completo para mockear
-
-// Mockeamos el middleware de autenticación
-jest.mock('../server', () => {
-    const originalModule = jest.requireActual('../server');
-    return {
-        ...originalModule,
-        authMiddleware: jest.fn((req, res, next) => {
-            req.user = { id: process.env.TEST_USER_ID }; // Inyectamos un usuario de prueba VÁLIDO
-            next();
-        }),
-    };
-});
-
+const { app } = require('../server'); 
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
+// Cliente de Supabase para operaciones directas en DB y Auth
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-describe('Gandalf Judge Endpoint', () => {
+describe('🛡️ GANDALF JUDGE ENDPOINT (INTEGRATION)', () => {
     let testTask;
-    const testUserId = process.env.TEST_USER_ID;
+    let validToken; // Aquí guardaremos la llave real
+    const TEST_USER_ID = process.env.TEST_USER_ID; 
 
+    // 1. ANTES DE NADA: CONSEGUIMOS UNA LLAVE REAL (LOGIN)
+    beforeAll(async () => {
+        // Usamos tus credenciales de desarrollo para obtener un token válido
+        // NOTA: Si cambias la pass de Frodo, cámbiala aquí también.
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: 'frodo@comarca.com',
+            password: 'anillo123'
+        });
+
+        if (error) throw new Error("❌ Error en Login de Test: " + error.message);
+        validToken = data.session.access_token;
+    });
+
+    // 2. ANTES DE CADA TEST: CREAMOS UNA TAREA DE PRUEBA
     beforeEach(async () => {
+        // Limpieza preventiva por si quedó basura
+        await supabase.from('tasks').delete().eq('titulo_epico', 'TEST_AUTO_GANDALF');
+
         const { data, error } = await supabase
             .from('tasks')
             .insert({
-                user_id: testUserId,
-                titulo_epico: 'Probar el Juicio de Mithrandir',
+                user_id: TEST_USER_ID,
+                titulo_epico: 'TEST_AUTO_GANDALF', // Título único para identificarla
+                categoria: 'estudio',
                 is_completed: false,
                 fallo_confirmado: false
             })
             .select()
             .single();
+
         if (error) throw new Error(`DB setup fallido: ${error.message}`);
         testTask = data;
     });
 
+    // 3. DESPUÉS DE CADA TEST: LIMPIAMOS LA SANGRE
     afterEach(async () => {
         if (testTask) {
             await supabase.from('tasks').delete().eq('id', testTask.id);
         }
     });
 
-    it('should mark a task as failed and set the failed_at timestamp', async () => {
+    // ⚔️ EL TEST DE FUEGO
+    it('Debe marcar una tarea como fallida y activar la fecha de fallo', async () => {
         const response = await request(app)
             .post('/api/gandalf/judge')
+            .set('Authorization', `Bearer ${validToken}`) // <--- ¡AQUÍ ESTÁ LA CLAVE! Enviamos el token real
             .send({ failureIds: [testTask.id] });
 
-        expect(response.statusCode).toBe(200);
+        // Verificaciones
+        expect(response.statusCode).toBe(200); // Ahora esperamos 200 OK
         expect(response.body.success).toBe(true);
 
+        // Verificamos en la Base de Datos que Gandalf hizo su trabajo
         const { data: updatedTask, error } = await supabase
             .from('tasks')
             .select('*')
@@ -59,10 +71,8 @@ describe('Gandalf Judge Endpoint', () => {
             .single();
         
         expect(error).toBeNull();
-        expect(updatedTask.fallo_confirmado).toBe(true);
-        expect(updatedTask.is_completed).toBe(false);
-        expect(updatedTask.failed_at).not.toBeNull();
+        expect(updatedTask.fallo_confirmado).toBe(true); // Se marcó el fallo
+        expect(updatedTask.is_completed).toBe(false);    // No está completada
+        expect(updatedTask.failed_at).not.toBeNull();    // Tiene fecha de la horda
     });
 });
-
-
