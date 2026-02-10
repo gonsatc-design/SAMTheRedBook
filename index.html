@@ -19,6 +19,11 @@
             0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.7); }
             50% { transform: scale(1.05); box-shadow: 0 0 5px 3px rgba(255, 165, 0, 0); }
         }
+        .task-card-failed {
+            opacity: 0.5;
+            border-left-color: #991b1b; /* red-900 */
+            transition: all 0.5s;
+        }
         .animate-pulse-agressive {
             animation: pulse-agressive 2s infinite;
         }
@@ -161,7 +166,8 @@
                 const horda = tarea.horda || { exploradores: 0, orcos: 0, urukhai: 0 };
                 
                 const card = document.createElement('div');
-                card.className = "bg-slate-800/80 p-4 rounded-lg border-l-4 border-amber-600 shadow-lg hover:bg-slate-800 transition-colors";
+card.className = `bg-slate-800/80 p-4 rounded-lg border-l-4 border-amber-600 shadow-lg hover:bg-slate-800 transition-colors task-card`;
+                card.dataset.taskId = tarea.id; // Añadimos un identificador para encontrarla fácilmenteme>
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-2">
                         <div>
@@ -195,6 +201,27 @@
             });
         }
 
+        function mostrarRespuestaSam(mensajes) {
+            const samReplyContainer = document.createElement('div');
+            samReplyContainer.className = "bg-slate-900/50 border border-amber-900/50 p-3 rounded-lg mb-3 text-center";
+            
+            mensajes.forEach(msg => {
+                const p = document.createElement('p');
+                p.className = "text-amber-200 text-sm italic";
+                p.innerHTML = `"${msg.reply}"`;
+                samReplyContainer.appendChild(p);
+            });
+            
+            taskContainer.prepend(samReplyContainer);
+
+            // El eco se desvanece para dar paso a la acción
+            setTimeout(() => {
+                samReplyContainer.style.transition = 'opacity 0.5s';
+                samReplyContainer.style.opacity = '0';
+                setTimeout(() => samReplyContainer.remove(), 500);
+            }, 4000); // Sam habla durante 4 segundos
+        }
+
         // --- ENVIAR NUEVA MISIÓN ---
         chatInput.addEventListener('keypress', async (e) => {
             if (e.key === 'Enter') {
@@ -225,8 +252,18 @@
                     });
 
                     const data = await res.json();
-                    if (data.success) {
-                        cargarMisiones(); 
+                    tempMsg.remove(); // Quitamos el mensaje de "enviando..."
+
+                    if (data.success && data.mensajes) {
+                        mostrarRespuestaSam(data.mensajes);
+                        // Esperamos un poco a que el usuario lea el mensaje antes de recargar
+                        setTimeout(() => {
+                            cargarMisiones(); 
+                        }, 2000); // 2 segundos de respiro
+                    } else {
+                        // Si falla, mostramos el error que pueda venir del backend
+                        const errorMsg = data.error || "La respuesta de Sam se perdió en el viento.";
+                        mostrarRespuestaSam([{ reply: errorMsg }]);
                     }
                 } catch(err) {
                     console.error(err);
@@ -239,10 +276,30 @@
         // --- JUICIO DE GANDALF ---
         window.juicioGandalf = async (id, veredicto) => {
             const token = await obtenerToken();
+            if (!token) return;
+
+            const cardElement = document.querySelector(`[data-task-id="${id}"]`);
+
+            if (veredicto === 'fracaso') {
+                if (cardElement) {
+                    cardElement.classList.add('task-card-failed');
+                    const hordaContainer = cardElement.querySelector('.flex.gap-1.text-xs');
+                    if(hordaContainer) {
+                        hordaContainer.innerHTML += `<span class="text-xs text-red-400 animate-pulse">🌱</span>`;
+                    }
+                }
+            } else {
+                 if (cardElement) {
+                    cardElement.style.transition = 'opacity 0.5s';
+                    cardElement.style.opacity = '0';
+                    setTimeout(() => cardElement.remove(), 500);
+                }
+            }
+
             const body = veredicto === 'exito' ? { successIds: [id] } : { failureIds: [id] };
 
             try {
-                await fetch('/api/gandalf/judge', {
+                const res = await fetch('/api/gandalf/judge', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -250,9 +307,17 @@
                     },
                     body: JSON.stringify(body)
                 });
-                cargarMisiones(); 
+                if (!res.ok) {
+                    // Si el backend falla, restauramos la UI para no mentir al usuario
+                    console.error("Fallo del Juicio en el backend. Revirtiendo UI.");
+                    cargarMisiones(); 
+                }
+                // Si el éxito fue real, la tarjeta ya ha sido eliminada o marcada.
+                // No es necesario un refresco completo, ahorramos una llamada de red.
+                
             } catch (err) {
                 console.error("Error en el juicio:", err);
+                cargarMisiones(); // En caso de error de red, resincronizamos todo
             }
         };
 

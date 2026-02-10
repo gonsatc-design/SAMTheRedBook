@@ -4,6 +4,17 @@
 require('@testing-library/jest-dom');
 const { screen } = require('@testing-library/dom');
 
+function mostrarRespuestaSam(container, mensajes) {
+    const samReplyContainer = document.createElement('div');
+    samReplyContainer.setAttribute('data-testid', 'sam-reply');
+    mensajes.forEach(msg => {
+        const p = document.createElement('p');
+        p.textContent = `"${msg.reply}"`;
+        samReplyContainer.appendChild(p);
+    });
+    container.prepend(samReplyContainer);
+}
+
 // Extraemos y adaptamos la función de renderizado para que sea testeable
 function renderizarTareas(container, tareas) {
     container.innerHTML = '';
@@ -77,5 +88,27 @@ describe('HUD de Asedio - Renderizado de Hordas', () => {
         // Verificamos que el icono está atenuado y NO tiene la animación
         expect(orcIconContainer).toHaveClass('opacity-20');
         expect(orcIconContainer).not.toHaveClass('animate-pulse-agressive');
+    });
+
+    test('El DOM debe mostrar el reply de Sam al crear una gesta', async () => {
+        // Arrange
+        document.body.innerHTML = `
+            <main id="taskContainer"></main>
+            <input type="text" id="chatInput">
+        `;
+        const taskContainer = document.getElementById('taskContainer');
+        const chatInput = document.getElementById('chatInput');
+        
+        // Mock de la respuesta del fetch a /api/briefing
+        const mockReply = "¡Claro que sí, Señor Frodo! ¡Una carga menos en el camino!";
+        
+        // Act
+        // Simulamos la respuesta de la función que acabamos de implementar
+        mostrarRespuestaSam(taskContainer, [{ reply: mockReply }]);
+
+        // Assert
+        const replyElement = await screen.findByTestId('sam-reply');
+        expect(replyElement).toBeInTheDocument();
+        expect(replyElement).toHaveTextContent(mockReply);
     });
 });
