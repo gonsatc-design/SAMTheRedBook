@@ -165,6 +165,10 @@ const PORT = 3000;
 
 // --- RUTA PARA LEER EL LIBRO (Obtener Misiones) ---
 app.get('/api/tasks', authMiddleware, async (req, res) => {
+    // El frontend puede enviar una fecha 'mock' para viajar en el tiempo
+    const { mockDate } = req.query;
+    const fechaReferencia = mockDate ? new Date(mockDate) : new Date();
+
     try {
         // Pedimos a Supabase las tareas del usuario autenticado que NO estén completadas
         // Ordenadas por las más recientes primero
@@ -179,7 +183,6 @@ app.get('/api/tasks', authMiddleware, async (req, res) => {
 
         // --- MOTOR DE ASEDIO ---
         // Para cada tarea, calculamos la horda basándonos en su `failed_at`
-        const fechaReferencia = new Date(); // Usamos la fecha actual del servidor
         const tasksConHorda = data.map(task => {
             // Si la tarea nunca ha fallado (failed_at es null), no hay horda.
             if (!task.failed_at) {

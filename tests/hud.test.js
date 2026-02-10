@@ -4,6 +4,21 @@
 require('@testing-library/jest-dom');
 const { screen } = require('@testing-library/dom');
 
+// --- Funciones del Frontend (adaptadas para testing) ---
+
+function actualizarNivelSombra(tareas) {
+    const totalEnemigos = tareas.reduce((sum, tarea) => {
+        const horda = tarea.horda || { exploradores: 0, orcos: 0, urukhai: 0 };
+        return sum + horda.exploradores + horda.orcos + horda.urukhai;
+    }, 0);
+
+    let nivelSombra = 0;
+    if (totalEnemigos >= 1 && totalEnemigos <= 5) nivelSombra = 1;
+    else if (totalEnemigos >= 6 && totalEnemigos <= 15) nivelSombra = 2;
+    else if (totalEnemigos > 15) nivelSombra = 3;
+    return nivelSombra;
+}
+
 function mostrarRespuestaSam(container, mensajes) {
     const samReplyContainer = document.createElement('div');
     samReplyContainer.setAttribute('data-testid', 'sam-reply');
@@ -110,5 +125,27 @@ describe('HUD de Asedio - Renderizado de Hordas', () => {
         const replyElement = await screen.findByTestId('sam-reply');
         expect(replyElement).toBeInTheDocument();
         expect(replyElement).toHaveTextContent(mockReply);
+    });
+});
+
+describe('Efecto de Sombra Global', () => {
+    test('Debe devolver nivel 0 si no hay enemigos', () => {
+        const tasks = [{ horda: { exploradores: 0, orcos: 0, urukhai: 0 } }];
+        expect(actualizarNivelSombra(tasks)).toBe(0);
+    });
+
+    test('Debe devolver nivel 1 para 1-5 enemigos', () => {
+        const tasks = [{ horda: { exploradores: 5, orcos: 0, urukhai: 0 } }];
+        expect(actualizarNivelSombra(tasks)).toBe(1);
+    });
+
+    test('Debe devolver nivel 2 para 6-15 enemigos', () => {
+        const tasks = [{ horda: { exploradores: 10, orcos: 5, urukhai: 0 } }];
+        expect(actualizarNivelSombra(tasks)).toBe(2);
+    });
+
+    test('Debe devolver nivel 3 para más de 15 enemigos', () => {
+        const tasks = [{ horda: { exploradores: 10, orcos: 5, urukhai: 1 } }];
+        expect(actualizarNivelSombra(tasks)).toBe(3);
     });
 });

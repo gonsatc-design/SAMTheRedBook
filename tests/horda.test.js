@@ -28,5 +28,22 @@ describe('Algoritmo de Asedio - calcularHorda', () => {
     const horda = calcularHorda(fechaFallo, fechaReferencia);
     expect(horda).toEqual({ exploradores: 5, orcos: 1, urukhai: 1 });
   });
-
 });
+
+describe('Time Mocking - Viaje en el Tiempo', () => {
+    test('Tras 5 días de fallo, debe aparecer 1 Uruk-Hai', () => {
+        // 1. Arrange: Una tarea falla "hoy"
+        const fechaFallo = new Date('2025-01-10T12:00:00.000Z');
+
+        // 2. Act: Viajamos 5 días al futuro
+        const fechaReferenciaFutura = new Date('2025-01-15T12:00:00.000Z');
+        
+        // 3. Assert: Verificamos la horda en esa fecha futura
+        const horda = calcularHorda(fechaFallo, fechaReferenciaFutura);
+        
+        expect(horda.exploradores).toBe(5);
+        expect(horda.orcos).toBe(1);
+        expect(horda.urukhai).toBe(1);
+    });
+});
+
