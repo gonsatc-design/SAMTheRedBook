@@ -24,8 +24,16 @@
             border-left-color: #991b1b; /* red-900 */
             transition: all 0.5s;
         }
-        .animate-pulse-agressive {
-            animation: pulse-agressive 2s infinite;
+        .sam-input:disabled { color: #475569; }
+        .gandalf-modal {
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid #b45309; /* amber-700 */
+        }
+        .gandalf-scroll {
+            background-image: linear-gradient(to bottom, rgba(254, 243, 199, 0.9), rgba(252, 211, 77, 0.9));
+            color: #451a03; /* amber-950 */
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
     </style>
 </head>
@@ -40,6 +48,21 @@
             </div>
             <div id="userStatus" class="text-xs text-slate-400">Esperando conexión...</div>
         </header>
+
+        <!-- Panel del Juicio de Gandalf (Oculto por defecto) -->
+        <div id="gandalfModal" class="hidden absolute inset-0 z-10 p-4 flex flex-col items-center justify-center gandalf-modal">
+            <div class="w-full h-full max-h-[80vh] gandalf-scroll rounded-lg border-2 border-amber-800 flex flex-col p-6">
+                <h2 class="text-2xl font-bold text-center mb-4 border-b-2 border-amber-800/30 pb-2">Un Asunto Pendiente</h2>
+                <p class="text-center text-sm mb-6">"Un mago nunca llega tarde, Frodo Bolsón. Ni pronto. Llega precisamente cuando se lo propone. Y hoy me propongo resolver esto."</p>
+                <div id="gandalfTaskList" class="flex-1 overflow-y-auto space-y-4 pr-2">
+                    <!-- Las tareas pendientes se inyectarán aquí -->
+                </div>
+                <button id="sellarJuicioBtn" class="w-full mt-6 bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold py-3 rounded-lg shadow-lg">Sellar el Juicio</button>
+            </div>
+        </div>
+
+        <!-- Panel Persistente del Mensaje de Sam -->
+        <div id="samReplyContainer" class="p-2 border-b border-slate-700"></div>
 
         <main id="taskContainer" class="flex-1 p-4 overflow-y-auto space-y-3 custom-scrollbar">
             <div class="text-center mt-20 text-slate-600 animate-pulse">
@@ -72,6 +95,10 @@
         const chatInput = document.getElementById('chatInput');
         const taskContainer = document.getElementById('taskContainer');
         const userStatus = document.getElementById('userStatus');
+        const samReplyContainer = document.getElementById('samReplyContainer');
+        const gandalfModal = document.getElementById('gandalfModal');
+        const gandalfTaskList = document.getElementById('gandalfTaskList');
+        const sellarJuicioBtn = document.getElementById('sellarJuicioBtn');
 
         // --- GESTIÓN DE TOKEN ---
         async function obtenerToken() {
@@ -139,7 +166,17 @@
                 const data = await res.json();
                 
                 if (data.success) {
-                    renderizarTareas(data.tasks);
+                    // SEPARAR TAREAS: Juicio de Gandalf vs. Gestas del día
+                    const { tareasPendientesDeJuicio, tareasDeHoy } = separarTareas(data.tasks);
+
+                    if (tareasPendientesDeJuicio.length > 0) {
+                        activarJuicioGandalf(tareasPendientesDeJuicio);
+                    } else {
+                        chatInput.disabled = false;
+                        gandalfModal.classList.add('hidden');
+                    }
+                    
+                    renderizarTareas(tareasDeHoy);
                 } else {
                     console.error("Error del servidor:", data.error);
                 }
@@ -147,6 +184,29 @@
                 console.error("Error de red:", e);
                 taskContainer.innerHTML = '<p class="text-red-500 text-center">⚠️ Error de conexión con SAM Server</p>';
             }
+        }
+
+        function esAnteriorAHoy(fecha) {
+            const fechaTarea = new Date(fecha);
+            const hoy = new Date();
+            // Ignoramos la hora, comparamos solo el día
+            hoy.setHours(0, 0, 0, 0);
+            return fechaTarea < hoy;
+        }
+
+        function separarTareas(tareas) {
+            const tareasPendientesDeJuicio = [];
+            const tareasDeHoy = [];
+
+            tareas.forEach(tarea => {
+                // Una tarea está pendiente de juicio si NO está completada, NO ha sido confirmada como fallida, Y es de un día anterior.
+                if (!tarea.is_completed && !tarea.fallo_confirmado && esAnteriorAHoy(tarea.created_at)) {
+                    tareasPendientesDeJuicio.push(tarea);
+                } else {
+                    tareasDeHoy.push(tarea);
+                }
+            });
+            return { tareasPendientesDeJuicio, tareasDeHoy };
         }
 
         // --- RENDERIZADO VISUAL ---
@@ -166,14 +226,17 @@
                 const horda = tarea.horda || { exploradores: 0, orcos: 0, urukhai: 0 };
                 
                 const card = document.createElement('div');
-card.className = `bg-slate-800/80 p-4 rounded-lg border-l-4 border-amber-600 shadow-lg hover:bg-slate-800 transition-colors task-card`;
-                card.dataset.taskId = tarea.id; // Añadimos un identificador para encontrarla fácilmenteme>
+                const esFallida = tarea.fallo_confirmado === true;
+
+                card.className = `bg-slate-800/80 p-4 rounded-lg border-l-4 shadow-lg transition-colors task-card ${esFallida ? 'task-card-failed' : 'border-amber-600 hover:bg-slate-800'}`;
+                card.dataset.taskId = tarea.id;
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-2">
                         <div>
                             <h3 class="font-bold text-amber-100">${tarea.titulo_epico}</h3>
                             <div class="flex gap-2 mt-1">
                                 <span class="text-[10px] uppercase bg-slate-900 px-2 py-0.5 rounded text-slate-400 border border-slate-700">${tarea.categoria}</span>
+                                ${esFallida ? `<span class="text-[10px] uppercase bg-red-900/50 px-2 py-0.5 rounded text-red-300 border border-red-800">Fallida</span>` : ''}
                             </div>
                         </div>
                         <div class="flex gap-1 text-xs">
@@ -189,10 +252,10 @@ card.className = `bg-slate-800/80 p-4 rounded-lg border-l-4 border-amber-600 sha
                         </div>
                     </div>
                     <div class="flex gap-2 mt-3 pt-2 border-t border-slate-700/50">
-                        <button onclick="juicioGandalf('${tarea.id}', 'exito')" class="flex-1 bg-green-900/30 hover:bg-green-700/50 text-green-300 text-xs py-1.5 rounded border border-green-900 transition-all">
+                        <button onclick="juicioGandalf('${tarea.id}', 'exito')" class="flex-1 bg-green-900/30 hover:bg-green-700/50 text-green-300 text-xs py-1.5 rounded border border-green-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed" ${esFallida ? 'disabled' : ''}>
                             ✅ Gesta Cumplida
                         </button>
-                        <button onclick="juicioGandalf('${tarea.id}', 'fracaso')" class="flex-1 bg-red-900/30 hover:bg-red-700/50 text-red-300 text-xs py-1.5 rounded border border-red-900 transition-all">
+                        <button onclick="juicioGandalf('${tarea.id}', 'fracaso')" class="flex-1 bg-red-900/30 hover:bg-red-700/50 text-red-300 text-xs py-1.5 rounded border border-red-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed" ${esFallida ? 'disabled' : ''}>
                             🔥 Caída en Sombra
                         </button>
                     </div>
@@ -202,24 +265,13 @@ card.className = `bg-slate-800/80 p-4 rounded-lg border-l-4 border-amber-600 sha
         }
 
         function mostrarRespuestaSam(mensajes) {
-            const samReplyContainer = document.createElement('div');
-            samReplyContainer.className = "bg-slate-900/50 border border-amber-900/50 p-3 rounded-lg mb-3 text-center";
-            
+            samReplyContainer.innerHTML = ''; // Limpiamos el panel anterior
             mensajes.forEach(msg => {
                 const p = document.createElement('p');
-                p.className = "text-amber-200 text-sm italic";
-                p.innerHTML = `"${msg.reply}"`;
+                p.className = "text-amber-200 text-sm italic text-center";
+                p.innerHTML = `&ldquo;${msg.reply}&rdquo;`;
                 samReplyContainer.appendChild(p);
             });
-            
-            taskContainer.prepend(samReplyContainer);
-
-            // El eco se desvanece para dar paso a la acción
-            setTimeout(() => {
-                samReplyContainer.style.transition = 'opacity 0.5s';
-                samReplyContainer.style.opacity = '0';
-                setTimeout(() => samReplyContainer.remove(), 500);
-            }, 4000); // Sam habla durante 4 segundos
         }
 
         // --- ENVIAR NUEVA MISIÓN ---
@@ -272,6 +324,73 @@ card.className = `bg-slate-800/80 p-4 rounded-lg border-l-4 border-amber-600 sha
                 }
             }
         });
+
+        // --- LÓGICA DEL JUICIO DE GANDALF ---
+        let juiciosPendientes = {}; // { 'task-id': 'exito' | 'fracaso' }
+
+        function activarJuicioGandalf(tareas) {
+            console.log("¡Gandalf interrumpe! Tareas pendientes de juicio:", tareas);
+            chatInput.disabled = true;
+            chatInput.placeholder = "Debes resolver los asuntos pendientes...";
+            gandalfModal.classList.remove('hidden');
+            gandalfTaskList.innerHTML = ''; 
+            juiciosPendientes = {};
+
+            tareas.forEach(tarea => {
+                const div = document.createElement('div');
+                div.className = "p-3 bg-amber-100/50 rounded-md flex justify-between items-center";
+                div.innerHTML = `
+                    <span class="font-bold">${tarea.titulo_epico}</span>
+                    <div class="flex gap-2" data-task-id="${tarea.id}">
+                        <button class="gandalf-choice-btn bg-green-800 text-white px-3 py-1 rounded" data-verdict="exito">Éxito</button>
+                        <button class="gandalf-choice-btn bg-red-800 text-white px-3 py-1 rounded" data-verdict="fracaso">Fracaso</button>
+                    </div>
+                `;
+                gandalfTaskList.appendChild(div);
+            });
+        }
+
+        gandalfTaskList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('gandalf-choice-btn')) {
+                const taskId = e.target.parentElement.dataset.taskId;
+                const verdict = e.target.dataset.verdict;
+                juiciosPendientes[taskId] = verdict;
+
+                // Feedback visual
+                e.target.parentElement.querySelectorAll('.gandalf-choice-btn').forEach(btn => {
+                    btn.classList.remove('ring-4', 'ring-white');
+                });
+                e.target.classList.add('ring-4', 'ring-white');
+            }
+        });
+
+        sellarJuicioBtn.addEventListener('click', async () => {
+            const successIds = Object.keys(juiciosPendientes).filter(id => juiciosPendientes[id] === 'exito');
+            const failureIds = Object.keys(juiciosPendientes).filter(id => juiciosPendientes[id] === 'fracaso');
+
+            if (successIds.length === 0 && failureIds.length === 0) {
+                alert("Debes emitir un juicio para cada asunto.");
+                return;
+            }
+
+            const token = await obtenerToken();
+            if(!token) return;
+
+            try {
+                await fetch('/api/gandalf/judge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ successIds, failureIds })
+                });
+                gandalfModal.classList.add('hidden');
+                chatInput.disabled = false;
+                chatInput.placeholder = "Escribe tu gesta aquí, Frodo...";
+                cargarMisiones(); // Recargamos para ver el resultado
+            } catch (err) {
+                console.error("Error al sellar el juicio:", err);
+            }
+        });
+
 
         // --- JUICIO DE GANDALF ---
         window.juicioGandalf = async (id, veredicto) => {
