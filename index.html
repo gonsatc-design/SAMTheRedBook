@@ -377,6 +377,23 @@
             const token = await obtenerToken();
             if(!token) return;
 
+            // 1. Chequeo de Caché (1 Hora)
+            const cacheKey = 'palantir_prediction';
+            const cacheTimeKey = 'palantir_timestamp';
+            const cachedPrediction = localStorage.getItem(cacheKey);
+            const cachedTime = localStorage.getItem(cacheTimeKey);
+            const ONE_HOUR = 60 * 60 * 1000;
+
+            if (cachedPrediction && cachedTime) {
+                const now = new Date().getTime();
+                if (now - parseInt(cachedTime) < ONE_HOUR) {
+                    console.log("🔮 Palantír: Usando visión retenida (Caché).");
+                    actualizarPalantir(JSON.parse(cachedPrediction));
+                    return;
+                }
+            }
+
+            // 2. Consulta a la API
             try {
                 const res = await fetch('/api/palantir/predict', {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -384,6 +401,10 @@
                 const data = await res.json();
 
                 if (data.success && data.prediction) {
+                    // Guardamos en caché
+                    localStorage.setItem(cacheKey, JSON.stringify(data.prediction));
+                    localStorage.setItem(cacheTimeKey, new Date().getTime().toString());
+                    
                     actualizarPalantir(data.prediction);
                 }
             } catch (err) {

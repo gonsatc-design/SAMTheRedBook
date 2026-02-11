@@ -128,6 +128,85 @@ describe('HUD de Asedio - Renderizado de Hordas', () => {
     });
 });
 
+function actualizarPalantir(container, prediction) {
+    const orb = container.querySelector('#palantirOrb');
+    const alerta = container.querySelector('#palantirAlerta');
+    const sugerencia = container.querySelector('#palantirSugerencia');
+
+    const { probabilidad_fallo, alerta: msgAlerta, sugerencia: msgSugerencia } = prediction;
+    
+    alerta.textContent = msgAlerta;
+    sugerencia.textContent = `"${msgSugerencia}"`;
+
+    orb.className = "w-8 h-8 rounded-full border-2 border-white/20 flex items-center justify-center cursor-pointer palantir-orb";
+    
+    if (probabilidad_fallo <= 30) {
+        orb.classList.add('bg-blue-500');
+    } else if (probabilidad_fallo <= 70) {
+        orb.classList.add('bg-amber-500');
+    } else {
+        orb.classList.add('bg-red-600');
+    }
+}
+
+describe('Visualización del Palantír (HUD)', () => {
+    test('Alerta Roja: El orbe debe ponerse rojo y mostrar mensaje de peligro', () => {
+        // Arrange
+        document.body.innerHTML = `
+            <div id="palantirContainer">
+                <div id="palantirOrb"></div>
+                <div id="palantirSuggestion">
+                    <p id="palantirAlerta"></p>
+                    <p id="palantirSugerencia"></p>
+                </div>
+            </div>
+        `;
+        const container = document.body;
+        const mockPrediction = {
+            probabilidad_fallo: 85,
+            alerta: "Peligro Inminente",
+            sugerencia: "Refuerza las defensas."
+        };
+
+        // Act
+        actualizarPalantir(container, mockPrediction);
+
+        // Assert
+        const orb = container.querySelector('#palantirOrb');
+        const alerta = container.querySelector('#palantirAlerta');
+        
+        expect(orb).toHaveClass('bg-red-600');
+        expect(orb).not.toHaveClass('bg-blue-500');
+        expect(alerta).toHaveTextContent("Peligro Inminente");
+    });
+
+    test('Cielo Despejado: El orbe debe ser azul', () => {
+        // Arrange
+        document.body.innerHTML = `
+            <div id="palantirContainer">
+                <div id="palantirOrb"></div>
+                <div id="palantirSuggestion">
+                    <p id="palantirAlerta"></p>
+                    <p id="palantirSugerencia"></p>
+                </div>
+            </div>
+        `;
+        const container = document.body;
+        const mockPrediction = {
+            probabilidad_fallo: 10,
+            alerta: "Todo en orden",
+            sugerencia: "Continúa así."
+        };
+
+        // Act
+        actualizarPalantir(container, mockPrediction);
+
+        // Assert
+        const orb = container.querySelector('#palantirOrb');
+        expect(orb).toHaveClass('bg-blue-500');
+    });
+});
+
 describe('Efecto de Sombra Global', () => {
     test('Debe devolver nivel 0 si no hay enemigos', () => {
         const tasks = [{ horda: { exploradores: 0, orcos: 0, urukhai: 0 } }];
