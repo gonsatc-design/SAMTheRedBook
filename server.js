@@ -15,6 +15,8 @@ const express = require('express');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { createClient } = require('@supabase/supabase-js');
 const { calcularHorda } = require('./horda');
+const { getHistoricalSnapshot } = require('./analytics');
+const { getPalantirPrediction } = require('./palantir');
 
 const app = express();
 app.use(express.json());
@@ -245,6 +247,22 @@ app.post('/api/gandalf/judge', authMiddleware, async (req, res) => {
             success: true, 
             message: "El juicio de Mithrandir ha concluido. El destino de las gestas ha sido sellado." 
         });
+
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// --- RUTA DEL ORÁCULO (PREDICCIÓN IA) ---
+app.get('/api/palantir/predict', authMiddleware, async (req, res) => {
+    try {
+        // 1. Recopilar datos históricos para el usuario
+        const historicalData = await getHistoricalSnapshot(req.user.id);
+
+        // 2. Enviar los datos al Oráculo para obtener la predicción
+        const prediction = await getPalantirPrediction(historicalData);
+
+        res.json({ success: true, prediction });
 
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });

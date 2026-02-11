@@ -6,5 +6,5 @@ module.exports = {
   coveragePathIgnorePatterns: [
     '/node_modules/'
   ],
-  testMatch: ['**/tests/server.test.js', '**/tests/horda.test.js'],
+  testMatch: ['**/tests/server.test.js', '**/tests/horda.test.js', '**/tests/analytics.test.js', '**/tests/palantir.test.js'],
 };
