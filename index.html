@@ -96,6 +96,28 @@
              </div>
         </header>
 
+        <!-- Modal de Login -->
+        <div id="loginModal" class="hidden absolute inset-0 z-20 flex items-center justify-center bg-slate-950/95 backdrop-blur-sm">
+            <div class="w-full max-w-sm mx-4 p-6 bg-slate-900 rounded-lg border border-amber-800 shadow-2xl">
+                <div class="text-center mb-6">
+                    <p class="text-5xl mb-3">📖</p>
+                    <h2 class="text-xl font-bold text-amber-400">El Gran Libro Rojo</h2>
+                    <p class="text-xs text-slate-400 mt-1">Identifícate, Portador del Anillo</p>
+                </div>
+                <div id="loginError" class="hidden mb-4 p-2 bg-red-900/50 border border-red-700 rounded text-red-300 text-xs text-center"></div>
+                <div class="space-y-3">
+                    <input id="loginEmail" type="email" placeholder="correo@comarca.com"
+                        class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-amber-100 placeholder-slate-500 focus:outline-none focus:border-amber-600">
+                    <input id="loginPassword" type="password" placeholder="Contraseña secreta"
+                        class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-amber-100 placeholder-slate-500 focus:outline-none focus:border-amber-600">
+                    <button id="loginBtn"
+                        class="w-full bg-amber-700 hover:bg-amber-600 text-amber-100 font-bold py-2 rounded transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                        Entrar a la Comarca
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Panel del Juicio de Gandalf (Oculto por defecto) -->
         <div id="gandalfModal" class="hidden absolute inset-0 z-10 p-4 flex flex-col items-center justify-center gandalf-modal">
             <div class="w-full h-full max-h-[80vh] gandalf-scroll rounded-lg border-2 border-amber-800 flex flex-col p-6">
@@ -154,6 +176,12 @@
         const gandalfModal = document.getElementById('gandalfModal');
         const gandalfTaskList = document.getElementById('gandalfTaskList');
         const sellarJuicioBtn = document.getElementById('sellarJuicioBtn');
+        // Elementos del Login Modal
+        const loginModal = document.getElementById('loginModal');
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
         // Elementos del Palantír
         const palantirOrb = document.getElementById('palantirOrb');
         const palantirAlerta = document.getElementById('palantirAlerta');
@@ -161,13 +189,14 @@
 
         // --- GESTIÓN DE TOKEN ---
         async function obtenerToken() {
-            // 🔴 CAMBIO AQUÍ
             const { data: { session } } = await samClient.auth.getSession();
             if (!session) {
-                userStatus.textContent = "🔒 Acceso Restringido (Login requerido)";
+                userStatus.textContent = "🔒 Sin sesión";
                 userStatus.className = "text-xs text-red-400 font-bold";
+                loginModal.classList.remove('hidden');
                 return null;
             }
+            loginModal.classList.add('hidden');
             userStatus.textContent = `👤 ${session.user.email}`;
             userStatus.className = "text-xs text-green-400";
             return session.access_token;
@@ -194,20 +223,7 @@
         async function cargarMisiones(mockDate = null) {
             const token = await obtenerToken();
             
-            if (!token) {
-                taskContainer.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-full text-center p-6">
-                        <div class="text-4xl mb-4">🛡️</div>
-                        <h2 class="text-xl text-red-400 mb-2">Acceso Denegado</h2>
-                        <p class="text-sm text-slate-400 mb-4">Necesitas el Sello del Rey para leer el libro.</p>
-                        <div class="bg-slate-800 p-3 rounded text-xs text-left w-full max-w-xs border border-slate-700">
-                            <p class="text-amber-500 mb-1">Escribe en la consola (F12):</p>
-                            <code class="text-green-400 select-all">login("tu@email.com", "tupassword")</code>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
+            if (!token) return; // El modal de login se gestiona desde obtenerToken
 
             const url = mockDate ? `/api/tasks?mockDate=${mockDate.toISOString()}` : '/api/tasks';
 
@@ -625,6 +641,39 @@
             
             console.log(`⏳ Viajando en el tiempo a: ${mockDate.toLocaleDateString()}`);
             cargarMisiones(mockDate);
+        });
+
+        // --- LÓGICA DEL MODAL DE LOGIN ---
+        async function intentarLogin() {
+            const email = loginEmail.value.trim();
+            const password = loginPassword.value;
+
+            if (!email || !password) {
+                loginError.textContent = "Introduce email y contraseña.";
+                loginError.classList.remove('hidden');
+                return;
+            }
+
+            loginBtn.textContent = "Verificando...";
+            loginBtn.disabled = true;
+            loginError.classList.add('hidden');
+
+            const { error } = await samClient.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                loginError.textContent = error.message;
+                loginError.classList.remove('hidden');
+                loginBtn.textContent = "Entrar a la Comarca";
+                loginBtn.disabled = false;
+            } else {
+                cargarMisiones();
+                consultarPalantir();
+            }
+        }
+
+        loginBtn.addEventListener('click', intentarLogin);
+        loginPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') intentarLogin();
         });
 
         // INICIO
