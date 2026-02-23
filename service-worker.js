@@ -7,7 +7,7 @@
  * - Acelerar carga subsequent
  */
 
-const CACHE_NAME = 'sam-v1';
+const CACHE_NAME = 'sam-v3';
 const URLS_TO_CACHE = [
     './',
     './index.html',
