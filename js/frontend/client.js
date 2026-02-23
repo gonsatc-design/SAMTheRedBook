@@ -137,7 +137,10 @@ function autoResizeChatInput() {
     chatInput.style.height = `${Math.min(chatInput.scrollHeight, 160)}px`;
 }
 
-// --- GESTIÓN DE TOKEN ---
+// ===================================================================================
+// SECCIÓN 1: DEFINICIÓN DE FUNCIONES PRINCIPALES
+// ===================================================================================
+
 async function obtenerToken() {
     const { data: { session } } = await samClient.auth.getSession();
     if (!session) {
@@ -163,34 +166,6 @@ window.login = async (email, password) => {
         cargarMisiones();
     }
 };
-
-// --- FRASES ALEATORIAS MIENTRAS SAM PIENSA ---
-const FRASES_SAM = [
-    "Afilando la pluma para el Libro Rojo...",
-    "Consultando las Memorias de Elrond...",
-    "Buscando en los Anales de la Tierra Media...",
-    "El destino toma forma en las manos del sabio...",
-    "Escudriñando los secretos del futuro...",
-    "El Palantír revela su verdad...",
-    "Tejiendo el hilo de tu destino...",
-    "Las antiguas palabras se despiertan...",
-    "El poder del Anillo hace su voluntad...",
-    "Compilando tus gestas en el Libro...",
-    "Pidiendo consejo a Gandalf...",
-    "Los Valar escuchan tu llamada...",
-    "La Tierra Media espera tu respuesta...",
-];
-
-const FRASES_SIN_MISIONES_ACTIVAS = [
-    "Has despejado el frente por ahora. Si aún te queda energía, escribe una gesta pequeña.",
-    "El Libro Rojo espera nuevas historias. ¿Cuál será tu próximo capítulo?",
-    "La calma precede a la tormenta. Disfruta de este respiro, pero mantente alerta.",
-    "Incluso el más grande de los héroes necesita un momento de paz. ¿Qué harás con el tuyo?"
-];
-
-function obtenerFraseSamAleatoria() {
-    return FRASES_SAM[Math.floor(Math.random() * FRASES_SAM.length)];
-}
 
 async function cargarMisiones(mockDate) {
     const token = await obtenerToken();
@@ -253,10 +228,29 @@ async function cargarMisiones(mockDate) {
     }
 }
 
-// --- BUCLE PRINCIPAL DE INICIALIZACIÓN ---
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log("⚡ S.R.B. Inicializando...");
+async function enviarChat() {
+    // ... (código de la función enviarChat)
+}
 
+async function actualizarPerfilUsuario() {
+    // ... (código de la función actualizarPerfilUsuario)
+}
+
+async function consultarPalantir() {
+    // ... (código de la función consultarPalantir)
+}
+
+// ===================================================================================
+// SECCIÓN 2: INICIALIZACIÓN DE LA APLICACIÓN
+// ===================================================================================
+
+// --- BUCLE PRINCIPAL DE INICIALIZACIÓN ---
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("⚡ S.R.B. Inicializando...");
+    init(); // Llamamos a la función que arranca todo
+});
+
+async function init() {
     // El guardián de autenticación ya se habrá ejecutado aquí
 
     const token = await obtenerToken();
@@ -270,7 +264,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             actualizarPerfilUsuario(),
             updateSauronHP(),
             consultarPalantir(),
-            // updateWorldHealth(), // <--- ELIMINADO: Esta función no existe y causaba un error.
             renderDedicatedAchievements(),
             setupRealtime()
         ]);
@@ -280,7 +273,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         cargarRecetas();
     }
 
-    // Event Listeners
+    // --- REGISTRO DE EVENT LISTENERS ---
+    // Solo registramos los listeners después de que todo está definido
     if (chatInput) {
         chatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -314,4 +308,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     });
-});
+
+    // ... (registrar aquí el resto de listeners si los hubiera) ...
+}
