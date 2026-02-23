@@ -21,3 +21,25 @@ Thumbs.db
 # --- ARCHIVOS DE BUILD (FUTURO) ---
 dist/
 build/
+
+# --- TEST/REPORTS ---
+coverage/
+.nyc_output/
+junit.xml
+
+# --- CACHE / TEMP ---
+.cache/
+tmp/
+temp/
+*.tmp
+*.bak
+
+# --- HERRAMIENTAS LOCALES ---
+.claude/
+
+# --- BASURA PUNTUAL DEL PROYECTO ---
+aaaaaaaaaa.txt
+BUG_FIXES_VISUAL.txt
+DEPLOYMENT_READY.txt
+RESUMEN_EJECUTIVO.txt
+STATUS_FINAL.txt

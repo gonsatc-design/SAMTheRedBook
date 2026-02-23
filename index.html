@@ -1,129 +1,553 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>S.A.M. - El Libro Rojo</title>
-    
+
+    <!-- SEO & Meta Tags -->
+    <meta name="description"
+        content="Un sistema de gestión de gestas épicas. Vence a la Sombra completando misiones, desbloquea logros y domina el arte de la productividad.">
+    <meta name="author" content="S.A.M. - El Libro Rojo">
+    <meta name="keywords" content="productividad, gamificación, IA, gestas, misiones, RPG">
+
+    <!-- Open Graph (Facebook, Discord, WhatsApp) -->
+    <meta property="og:title" content="S.A.M. - ¿Podrás vencer a la Sombra?">
+    <meta property="og:description"
+        content="Un viaje épico hacia la productividad. Completa misiones, desbloquea logros y conviértete en leyenda.">
+    <meta property="og:image"
+        content="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 630%22><rect fill=%22%230f172a%22 width=%221200%22 height=%22630%22/><text x=%22600%22 y=%22300%22 font-size=%22120%22 fill=%22%23fbbf24%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22>📜 S.A.M.</text><text x=%22600%22 y=%22450%22 font-size=%2240%22 fill=%22%23e2e8f0%22 text-anchor=%22middle%22>El Libro Rojo</text></svg>">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_ES">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="S.A.M. - ¿Podrás vencer a la Sombra?">
+    <meta name="twitter:description"
+        content="Completa misiones épicas y vence a la Sombra. Gamificación + IA para la productividad.">
+
+    <!-- Safety Globals -->
+    <script>
+        window.logoutUser = window.logoutUser || function (b) { console.log("⏳ Esperando a que el Libro cargue sus secretos..."); };
+        window.toggleMode = window.toggleMode || function (m) { console.log("⏳ Preparando la Forja..."); };
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="index.css">
 
-    <style>
-        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Courier New', Courier, monospace; }
-        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .sam-input { background: transparent; border: none; outline: none; width: 100%; color: #fbbf24; }
-        .horda-badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.5); }
-        @keyframes pulse-agressive {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.7); }
-            50% { transform: scale(1.05); box-shadow: 0 0 5px 3px rgba(255, 165, 0, 0); }
-        }
-        .task-card-failed {
-            opacity: 0.5;
-            border-left-color: #991b1b; /* red-900 */
-            transition: all 0.5s;
-        }
-        @keyframes glow-blue { 0%, 100% { box-shadow: 0 0 5px #60a5fa, 0 0 10px #60a5fa; } 50% { box-shadow: 0 0 15px #60a5fa, 0 0 20px #3b82f6; } }
-        @keyframes glow-amber { 0%, 100% { box-shadow: 0 0 7px #f59e0b, 0 0 12px #f59e0b; } 50% { box-shadow: 0 0 18px #f59e0b, 0 0 25px #d97706; } }
-        @keyframes glow-red { 0%, 100% { box-shadow: 0 0 10px #f87171, 0 0 15px #f87171; } 50% { box-shadow: 0 0 25px #ef4444, 0 0 35px #dc2626; } }
-        .palantir-orb { animation-duration: 3s; animation-iteration-count: infinite; }
-        .palantir-suggestion {
-            backdrop-filter: blur(8px);
-            background: rgba(15, 23, 42, 0.7); /* slate-900 with transparency */
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s, visibility 0.3s;
-        }
-        .palantir-container:hover .palantir-suggestion { visibility: visible; opacity: 1; }
-        .sam-input:disabled { color: #475569; }
-        .gandalf-modal {
-            background-color: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid #b45309; /* amber-700 */
-        }
-        .shadow-level-1 { filter: brightness(0.95) saturate(0.9); }
-        .shadow-level-2 { filter: brightness(0.8) saturate(0.7) sepia(0.2); }
-        .shadow-level-3 { filter: brightness(0.7) saturate(0.6) sepia(0.4); }
-        .shadow-vignette::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            box-shadow: inset 0 0 100px rgba(127, 29, 29, 0.7);
-            pointer-events: none;
-        }
-        .dev-panel {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.8);
-            border: 1px solid #fbbf24;
-            color: #fbbf24;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 12px;
-            z-index: 100;
-        }
-        .gandalf-scroll {
-            background-image: linear-gradient(to bottom, rgba(254, 243, 199, 0.9), rgba(252, 211, 77, 0.9));
-            color: #451a03; /* amber-950 */
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-    </style>
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📜</text></svg>">
+    <link rel="apple-touch-icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📜</text></svg>">
+    <meta name="theme-color" content="#fbbf24">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="styles.css">
+
 </head>
-<body class="h-screen flex flex-col items-center justify-center overflow-hidden">
 
-    <div class="w-full max-w-2xl h-[90vh] glass-panel rounded-xl shadow-2xl flex flex-col relative">
-        
+<body
+    class="h-screen flex flex-col items-center justify-center overflow-hidden transition-colors duration-1000 warm-mode">
+    <div id="toastContainer"></div>
+
+    <!-- Splash Screen -->
+    <div id="splashScreen"
+        class="fixed inset-0 z-[1000] bg-slate-950 flex flex-col items-center justify-center transition-opacity duration-700">
+        <div class="text-6xl mb-4 animate-bounce">📜</div>
+        <h1 class="text-2xl font-bold text-amber-500 tracking-[0.25em] animate-pulse">S.A.M. EL LIBRO ROJO</h1>
+        <p class="text-slate-500 text-xs mt-4 italic">"Un viaje épico hacia la productividad..."</p>
+    </div>
+
+
+
+    <div
+        class="app-shell-premium w-full max-w-2xl h-[92vh] glass-panel rounded-xl shadow-2xl flex flex-col relative transition-all duration-500 overflow-hidden">
+
         <header class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900/50 rounded-t-xl">
+            <div class="flex items-center">
+                <h1 class="text-2xl font-bold text-amber-400 tracking-[0.2em] drop-shadow-lg">S.A.M. EL LIBRO ROJO</h1>
+            </div>
             <div class="flex items-center gap-3">
-                <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-                 <h1 class="text-xl font-bold text-amber-500 tracking-widest">S.A.M. <span class="text-xs text-slate-500">v1.0</span></h1>
-             </div>
-             <div class="flex items-center gap-4">
+                <!-- Botón TFM Showcase -->
+                <a href="tfm-showcase.html"
+                    class="h-8 px-3 rounded-full bg-slate-900/40 border border-amber-700/50 flex items-center justify-center text-amber-300 hover:bg-slate-800 transition-colors text-[11px] font-bold tracking-wider"
+                    title="Ver presentación visual del TFM">
+                    TFM
+                </a>
+                <!-- Botón de Guía -->
+                <button onclick="showGuide()"
+                    class="w-8 h-8 rounded-full bg-amber-900/30 border border-amber-600/50 flex items-center justify-center text-amber-500 hover:bg-amber-800 transition-colors"
+                    title="Manual de Supervivencia">
+                    <span>📖</span>
+                </button>
                 <!-- El Ojo del Palantír -->
-                <div id="palantirContainer" class="relative palantir-container">
-                    <div id="palantirOrb" class="w-8 h-8 rounded-full border-2 border-white/20 flex items-center justify-center cursor-pointer bg-blue-500 palantir-orb" style="animation-name: glow-blue;">
+                <div id="palantirContainer" class="relative palantir-container mr-2">
+                    <div id="palantirOrb"
+                        class="w-8 h-8 rounded-full border-2 border-white/20 flex items-center justify-center cursor-pointer bg-blue-500 palantir-orb"
+                        style="animation-name: glow-blue;">
                         <div class="w-3 h-3 bg-white rounded-full"></div>
                     </div>
-                    <div id="palantirSuggestion" class="palantir-suggestion absolute top-full right-0 mt-2 w-64 p-3 rounded-lg text-xs text-center shadow-2xl">
+                    <div id="palantirSuggestion"
+                        class="palantir-suggestion absolute top-full right-0 mt-2 w-64 p-3 rounded-lg text-xs text-center shadow-2xl">
                         <p id="palantirAlerta" class="font-bold mb-1"></p>
                         <p id="palantirSugerencia" class="italic"></p>
                     </div>
                 </div>
-                <div id="userStatus" class="text-xs text-slate-400">Esperando conexión...</div>
-             </div>
+                <!-- SIMPLIFICADO: Solo Palantír, sin datos de usuario -->
+            </div>
         </header>
 
         <!-- Panel del Juicio de Gandalf (Oculto por defecto) -->
-        <div id="gandalfModal" class="hidden absolute inset-0 z-10 p-4 flex flex-col items-center justify-center gandalf-modal">
-            <div class="w-full h-full max-h-[80vh] gandalf-scroll rounded-lg border-2 border-amber-800 flex flex-col p-6">
-                <h2 class="text-2xl font-bold text-center mb-4 border-b-2 border-amber-800/30 pb-2">Un Asunto Pendiente</h2>
-                <p class="text-center text-sm mb-6">"Un mago nunca llega tarde, Frodo Bolsón. Ni pronto. Llega precisamente cuando se lo propone. Y hoy me propongo resolver esto."</p>
+        <div id="gandalfModal"
+            class="hidden absolute inset-0 z-10 p-4 flex flex-col items-center justify-center gandalf-modal">
+            <div
+                class="w-full h-full max-h-[80vh] gandalf-scroll rounded-lg border-2 border-amber-800 flex flex-col p-6">
+                <h2 class="text-2xl font-bold text-center mb-4 border-b-2 border-amber-800/30 pb-2">Un Asunto Pendiente
+                </h2>
+                <p class="text-center text-sm mb-6">"Un mago nunca llega tarde. Ni pronto. Llega
+                    precisamente cuando se lo propone. Y hoy me propongo resolver esto."</p>
                 <div id="gandalfTaskList" class="flex-1 overflow-y-auto space-y-4 pr-2">
                     <!-- Las tareas pendientes se inyectarán aquí -->
                 </div>
-                <button id="sellarJuicioBtn" class="w-full mt-6 bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold py-3 rounded-lg shadow-lg">Sellar el Juicio</button>
+                <button id="sellarJuicioBtn"
+                    class="w-full mt-6 bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold py-3 rounded-lg shadow-lg">Sellar
+                    el Juicio</button>
+            </div>
+        </div>
+
+        <!-- MODAL DE SELECCIÓN DE RAZA (BLOQUE 0) -->
+        <div id="raceSelectionModal"
+            class="hidden absolute inset-0 z-[100] bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center">
+            <h2 id="raceModalTitle" class="text-2xl font-bold text-amber-500 mb-2">¿ERES EL PORTADOR DEL ANILLO?</h2>
+            <p id="raceModalSubtitle" class="text-xs text-slate-400 mb-8 italic">Solo Sam (S.A.M.) te acompaña y registrará tus gestas. En
+                tus manos está el destino.</p>
+
+            <div class="grid grid-cols-2 gap-4 w-full max-w-md">
+                <button
+                    class="race-opt p-4 glass-panel rounded-lg border border-slate-700 hover:border-amber-500 transition-all flex flex-col items-center group"
+                    data-race="Humano">
+                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">🗡️</span>
+                    <span class="font-bold text-amber-100">HUMANO</span>
+                    <span class="text-[9px] text-slate-500 mt-1">Senda del Rey</span>
+                </button>
+                <button
+                    class="race-opt p-4 glass-panel rounded-lg border border-slate-700 hover:border-amber-500 transition-all flex flex-col items-center group"
+                    data-race="Elfo">
+                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">🏹</span>
+                    <span class="font-bold text-amber-100">ELFO</span>
+                    <span class="text-[9px] text-slate-500 mt-1">Senda Inmortal</span>
+                </button>
+                <button
+                    class="race-opt p-4 glass-panel rounded-lg border border-slate-700 hover:border-amber-500 transition-all flex flex-col items-center group"
+                    data-race="Enano">
+                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">⚒️</span>
+                    <span class="font-bold text-amber-100">ENANO</span>
+                    <span class="text-[9px] text-slate-500 mt-1">Senda de Piedra</span>
+                </button>
+                <button
+                    class="race-opt p-4 glass-panel rounded-lg border border-slate-700 hover:border-amber-500 transition-all flex flex-col items-center group"
+                    data-race="Hobbit">
+                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">🍄</span>
+                    <span class="font-bold text-amber-100">HOBBIT</span>
+                    <span class="text-[9px] text-slate-500 mt-1">Senda del Hogar</span>
+                </button>
             </div>
         </div>
 
         <!-- Panel Persistente del Mensaje de Sam -->
         <div id="samReplyContainer" class="p-2 border-b border-slate-700"></div>
 
-        <main id="taskContainer" class="flex-1 p-4 overflow-y-auto space-y-3 custom-scrollbar">
+        <!-- BARRA DE PROGRESO DEL VIAJE (HUD) -->
+        <div id="sauronHPContainer"
+            class="px-4 py-3 bg-black/60 border-b border-red-900/50 hidden relative overflow-hidden">
+            <!-- Partículas de fuego se inyectarán aquí -->
+            <div id="fireContainer" class="absolute inset-0 pointer-events-none"></div>
+
+            <div class="flex items-center gap-4 mb-2 relative z-10">
+                <div class="balrog-sprite" id="bossIcon">🌋</div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-end mb-1">
+                        <span class="text-[10px] text-red-500 font-bold tracking-widest uppercase" id="bossName">Distancia
+                            hasta llegar al Monte del Destino</span>
+                        <span id="sauronHPText" class="text-[10px] text-red-400 font-mono">100% restante</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div id="journeyBarTrack" class="relative w-full">
+                            <div class="hp-bar-container h-3 rounded-sm w-full">
+                                <div id="sauronHPBar" class="hp-bar-fill h-full w-full"></div>
+                            </div>
+                            <div id="journeyProgressMarker"
+                                class="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/2 flex items-center gap-1 text-[10px] leading-none pointer-events-none z-20 bg-black/65 px-1.5 py-0.5 rounded-full border border-amber-700/50">
+                                <span id="journeyRaceIcon" title="Raza del Portador">👤</span>
+                                <span id="journeyRingIcon" title="Anillo Único">💍</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+        <!-- VISTA DE MISIONES (Default) -->
+        <main id="taskContainer"
+            class="flex-1 px-3 py-2 overflow-y-auto space-y-2 custom-scrollbar transition-opacity duration-300">
             <div class="text-center mt-20 text-slate-600 animate-pulse">
                 Consultando el Libro Rojo...
             </div>
         </main>
 
-        <footer class="p-4 border-t border-slate-700 bg-slate-900/80 rounded-b-xl">
-            <div class="flex items-center gap-2 text-amber-500">
-                <span>></span>
-                <input type="text" id="chatInput" class="sam-input placeholder-slate-600" placeholder="Escribe tu gesta aquí, Frodo..." autocomplete="off">
+        <!-- VISTA DE SALA DE GUERRA (Oculta por defecto) -->
+        <main id="warRoomContainer"
+            class="hidden flex-1 p-4 overflow-y-auto custom-scrollbar vintage-grid war-room-panel relative">
+            <h2 class="text-center text-amber-600 font-bold mb-4 tracking-[0.2em] border-b border-amber-900/30 pb-2">
+                MAPA TÁCTICO</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <!-- HUMANO -->
+                <div class="bg-slate-900/80 p-3 rounded border border-slate-700 shadow-lg">
+                    <h3 class="text-xs text-amber-500 mb-2 text-center uppercase">Semana de Humano</h3>
+                    <div class="relative h-48">
+                        <canvas id="raceChartHumano"></canvas>
+                    </div>
+                </div>
+
+                <!-- ELFO -->
+                <div class="bg-slate-900/80 p-3 rounded border border-slate-700 shadow-lg">
+                    <h3 class="text-xs text-emerald-400 mb-2 text-center uppercase">Semana de Elfo</h3>
+                    <div class="relative h-48">
+                        <canvas id="raceChartElfo"></canvas>
+                    </div>
+                </div>
+
+                <!-- ENANO -->
+                <div class="bg-slate-900/80 p-3 rounded border border-slate-700 shadow-lg">
+                    <h3 class="text-xs text-orange-300 mb-2 text-center uppercase">Semana de Enano</h3>
+                    <div class="relative h-48">
+                        <canvas id="raceChartEnano"></canvas>
+                    </div>
+                </div>
+
+                <!-- HOBBIT -->
+                <div class="bg-slate-900/80 p-3 rounded border border-slate-700 shadow-lg">
+                    <h3 class="text-xs text-yellow-300 mb-2 text-center uppercase">Semana de Hobbit</h3>
+                    <div class="relative h-48">
+                        <canvas id="raceChartHobbit"></canvas>
+                    </div>
+                </div>
             </div>
-            <div class="text-[10px] text-slate-600 mt-2 text-right">Sistema de Asistencia Táctica - SIEMPRE A MUERTE</div>
-        </footer>
+
+            <div class="text-center text-[10px] text-slate-500 italic mt-4">
+                "Los datos se actualizan con cada amanecer..."
+            </div>
+            <div class="mt-3 rounded border border-slate-700/50 bg-black/20 p-3">
+                <p class="text-[11px] text-slate-300 leading-relaxed">
+                    Aquí ves la guerra semanal por razas. Cada gráfica muestra de lunes a domingo
+                    las gestas cumplidas frente a las fallidas para Humano, Elfo, Enano y Hobbit.
+                </p>
+                <p class="text-[10px] text-slate-400 mt-2">
+                    Reinicio semanal automático: domingo a las 23:59.
+                </p>
+            </div>
+        </main>
+
+        <!-- VISTA DE MOCHILA -->
+        <main id="backpackContainer" class="hidden flex-1 p-4 overflow-y-auto custom-scrollbar vintage-grid">
+            <h2 class="text-center text-amber-600 font-bold mb-4 tracking-[0.2em] border-b border-amber-900/30 pb-2">LA
+                MOCHILA</h2>
+            <div id="inventoryGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <!-- Los items se inyectarán aquí -->
+            </div>
+            <div id="emptyInventory" class="hidden text-center mt-20 text-slate-600 italic">
+                La mochila está vacía... por ahora.
+            </div>
+        </main>
+
+        <!-- VISTA DE LA FORJA (NUEVA) -->
+        <main id="forgeContainer" class="hidden flex-1 p-4 overflow-y-auto custom-scrollbar vintage-grid">
+            <h2 class="text-center text-amber-600 font-bold mb-4 tracking-[0.2em] border-b border-amber-900/30 pb-2">
+                YUNQUE DE DURIN</h2>
+            <div class="bg-black/40 p-3 rounded border border-amber-900/30 mb-6 text-center">
+                <p class="text-[10px] text-amber-200/50 italic">"Solo aquellos con materiales raros y paciencia
+                    de enano forjarán el destino."</p>
+            </div>
+
+            <div id="recipesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-2">
+                <!-- Las recetas se cargarán dinámicamente desde JS -->
+            </div>
+        </main>
+
+        <!-- SECCIÓN DE LOGROS (NUEVA) -->
+        <main id="achievementsTab" class="hidden flex-1 overflow-hidden flex flex-col bg-slate-950/20">
+            <div class="p-6 flex-1 overflow-y-auto custom-scrollbar">
+                <div class="flex items-center justify-between mb-6 border-b border-amber-900/40 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-amber-500 tracking-tighter">🏛️ LOGROS</h2>
+                    </div>
+                </div>
+
+                <div id="achievementsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    <!-- Los logros se inyectarán aquí -->
+                </div>
+            </div>
+        </main>
+
+        <!-- MODAL DE DETALLE: PERGAMINO TÉCNICO -->
+        <div id="itemDetailModal"
+            class="hidden absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
+            <div class="gandalf-scroll w-full max-w-sm rounded-lg border-2 border-amber-800 p-6 relative">
+                <button id="closeItemDetail" class="absolute top-2 right-4 text-2xl text-amber-900">&times;</button>
+                <div class="flex flex-col items-center text-center">
+                    <div id="itemDetailIcon" class="text-5xl mb-4">📦</div>
+                    <h3 id="itemDetailName" class="text-2xl font-bold border-b border-amber-900/30 pb-2 w-full">Nombre
+                        del Item</h3>
+                    <p id="itemDetailRarity" class="text-xs uppercase tracking-widest my-2 font-bold text-amber-900">
+                        Rareza</p>
+                    <div
+                        class="bg-amber-900/10 p-4 rounded border border-amber-900/20 italic text-sm mt-2 text-justify">
+                        <p id="itemDetailDescription">Descripción técnica del material...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DE GUÍA: MANUAL DE SAM (NUEVO) -->
+        <div id="guideModal"
+            class="hidden absolute inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-md p-6">
+            <div
+                class="guide-panel w-full max-w-lg rounded-lg border border-slate-700 p-8 relative overflow-y-auto max-h-[90vh]">
+                <button id="closeGuideBtn"
+                    class="absolute top-4 right-6 text-3xl text-amber-300 font-bold">&times;</button>
+
+                <h2 class="text-2xl font-bold border-b border-amber-700/30 pb-2 mb-4 text-center text-amber-300">📜 MANUAL DEL
+                    PORTADOR</h2>
+
+                <div class="space-y-6 text-sm text-slate-200 leading-relaxed">
+                    <section class="rounded border border-amber-700/30 bg-slate-900/70 p-3">
+                        <h3 class="font-bold uppercase text-xs tracking-widest mb-2 text-amber-300">💍 TU MISIÓN</h3>
+                        <p>Frodo enfermó de gravedad tras la herida de la daga de Morgul y no se recupera a tiempo.
+                            En el Concilio de Elrond decides alzarte como voluntario, y ahora eres el Portador del
+                            Anillo. Solo S.A.M. (<strong>Social Achievement Manager</strong>) te acompaña y registrará cada gesta en el
+                            Libro Rojo para la eternidad.
+                            En tus manos está el destino.</p>
+                    </section>
+                    <section>
+                        <h3 class="font-bold uppercase text-xs tracking-widest mb-2 border-b border-slate-700">⚔️ EL
+                            CAMINO</h3>
+                        <p>Anota tus tareas en el diario. S.A.M. las traducirá a gestas épicas.
+                            Cada éxito te acerca al Monte del Destino para destruir el Anillo y acabar con Sauron y
+                            las fuerzas de la oscuridad. Además, obtendrás materiales y oro.</p>
+                    </section>
+
+                    <section>
+                        <h3 class="font-bold uppercase text-xs tracking-widest mb-2 border-b border-slate-700">💀 LA
+                            SOMBRA</h3>
+                        <p>Si dejas una tarea para mañana, la horda empezará a crecer. Primero exploradores, luego
+                            orcos... ¡no dejes que las fuerzas de la oscuridad invadan la Tierra Media!</p>
+                        <p class="mt-2">Además, la interfaz se oscurece por niveles cuando acumulas fallos. Cuantos
+                            más días arrastres tareas sin resolver, más sombrío se verá el entorno.</p>
+                    </section>
+
+                    <section>
+                        <h3 class="font-bold uppercase text-xs tracking-widest mb-2 border-b border-slate-700">⚒️ LA
+                            FORJA</h3>
+                        <p>Los materiales que recojas (Hierro, Cuero, Mithril) se pueden usar en el <strong>Yunque de
+                                Durin</strong> para crear artefactos que te dan bonos permanentes de XP o protección.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h3 class="font-bold uppercase text-xs tracking-widest mb-2 border-b border-slate-700">🔮 EL
+                            PALANTÍR</h3>
+                        <p>El Palantír no es un adorno: es una IA predictiva con memoria de tus patrones.
+                            Aprende cómo actúas, anticipa dónde puedes caer y te lanza advertencias antes de que la
+                            Sombra gane terreno.</p>
+                        <p class="mt-3">Dicho fácil: te avisa antes del tropiezo para que llegues preparado, no a
+                            última hora.</p>
+                    </section>
+
+                    <section>
+                        <h3 class="font-bold uppercase text-xs tracking-widest mb-2 border-b border-slate-700">MAPA
+                            TÁCTICO</h3>
+                        <p>Las gráficas por raza cubren la semana en curso (lunes a domingo). El recuento se reinicia
+                            cada domingo a las 23:59.</p>
+                    </section>
+
+                    <section>
+                        <h3 class="font-bold uppercase text-xs tracking-widest mb-2 border-b border-slate-700">📈
+                            EVOLUCIÓN DE CLASE</h3>
+                        <p class="text-xs italic opacity-80 mb-4">Niveles de evolución por raza (hitos):
+                            1 -> 8 -> 18 -> 25 -> 42 -> 60 -> 75 -> 99</p>
+                        <ul class="text-xs space-y-2 list-none p-3 rounded border border-slate-700 bg-slate-950/80 font-bold text-slate-100">
+                            <li><strong class="text-amber-300">Humano:</strong> Granjero → Aventurero → Montaraz →
+                                Caballero → Paladín → Rey</li>
+                            <li><strong class="text-emerald-300">Elfo:</strong> Novicio de Lórien → Explorador del
+                                Bosque → Guardián del Sendero → Arquero Maestro → Señor de los Caballos → Alto Consejero
+                                → Soberano Estelar → Señor de Rivendel</li>
+                            <li><strong class="text-orange-300">Enano:</strong> Minero de Moria → Picapedrero →
+                                Herrero de Erebor → Guardián del Tesoro → Señor del Yunque → Gran Escudo de Hierro → Rey
+                                bajo la Montaña → Linaje de Durin</li>
+                            <li><strong class="text-yellow-300">Hobbit:</strong> Habitante del Agujero → Cocinero de
+                                Bolsón → Buscador de Setas → Aventurero Local → Héroe de la Comarca → Portador de la
+                                Esperanza → Alcalde de Cavada Grande → Thain de la Comarca</li>
+                        </ul>
+                    </section>
+                </div>
+
+                <div class="mt-8 text-center text-[10px] italic opacity-60">"Incluso la persona más pequeña puede
+                    cambiar el curso del futuro."</div>
+            </div>
+        </div>
+
+        <!-- VISTA DE PERFIL (Oculta por defecto) -->
+        <main id="profileContainer"
+            class="hidden flex-1 p-6 overflow-y-auto custom-scrollbar bg-gradient-to-b from-slate-900 to-slate-950">
+            <div class="flex flex-col space-y-6 max-w-2xl mx-auto">
+
+                <!-- ENCABEZADO: RAZA Y NICKNAME -->
+                <div class="glass-panel rounded-lg p-6 border border-amber-800/50">
+                    <div class="flex items-center gap-6">
+                        <div
+                            class="w-32 h-32 rounded-full bg-gradient-to-br from-amber-900 to-slate-900 border-4 border-amber-500 flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.4)]">
+                            <span class="text-6xl" id="profileRaceIcon">👤</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <h2 id="profileEmail" class="text-2xl font-bold text-amber-100">Cargando...</h2>
+                                <button id="editNicknameBtn"
+                                    class="text-amber-400 hover:text-amber-200 transition-colors" title="Editar nombre"
+                                    onclick="mostrarEditarNickname()">
+                                    ✏️
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-sm text-slate-400 uppercase tracking-widest">Raza</span>
+                                <p id="playerRace" class="text-lg text-amber-500 font-bold uppercase">Sin Raza</p>
+                            </div>
+                            <button id="changeRaceBtn"
+                                class="text-[11px] px-3 py-1.5 rounded border border-amber-700/50 text-amber-300 hover:bg-amber-900/20 transition-colors font-bold tracking-wide">
+                                CAMBIAR RAZA (1.000.000 ORO)
+                            </button>
+                            <div>
+                                <span class="text-xs text-slate-500 uppercase">Estado Actual</span>
+                                <p id="profileRaceTitle" class="text-sm text-amber-300 italic font-serif">Aventurero</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ESTADÍSTICAS: NIVEL, XP, ORO -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- NIVEL -->
+                    <div class="glass-panel rounded-lg p-4 border border-indigo-600/30 text-center">
+                        <div class="text-3xl font-black text-indigo-400 mb-1" id="profileLevel">1</div>
+                        <div class="text-xs text-slate-400 uppercase tracking-widest">NIVEL</div>
+                    </div>
+
+                    <!-- ORO -->
+                    <div class="glass-panel rounded-lg p-4 border border-amber-600/30 text-center">
+                        <div class="text-3xl font-black text-amber-400 mb-1" id="profileGold">0</div>
+                        <div class="text-xs text-slate-400 uppercase tracking-widest">ORO</div>
+                    </div>
+
+                    <!-- LOGROS -->
+                    <div class="glass-panel rounded-lg p-4 border border-purple-600/30 text-center">
+                        <div class="text-3xl font-black text-purple-400 mb-1" id="profileAchievementsCount">0</div>
+                        <div class="text-xs text-slate-400 uppercase tracking-widest">LOGROS</div>
+                    </div>
+                </div>
+
+                <!-- BARRA DE EXPERIENCIA -->
+                <div class="glass-panel rounded-lg p-4 border border-purple-600/30">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs text-slate-400 uppercase tracking-widest">Experiencia</span>
+                        <span class="text-xs text-purple-400 font-bold" id="profileXPText">0/1000 XP</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-4 rounded-full overflow-hidden border border-purple-700/50">
+                        <div id="profileXPBarLarge"
+                            class="bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500 h-full w-0 transition-all duration-1000 shadow-[0_0_10px_rgba(168,85,247,0.5)]">
+                        </div>
+                    </div>
+                    <div class="mt-2 text-[10px] text-slate-500">
+                        <span id="profileXPPercent">0%</span> - <span id="profileNextLevel">Próximo nivel: 1000
+                            XP</span>
+                    </div>
+                </div>
+
+                <!-- CERRAR SESIÓN -->
+                <div class="glass-panel rounded-lg p-4 border border-red-900/30">
+                    <button onclick="logoutUser(this)"
+                        class="w-full flex items-center justify-center gap-2 text-red-400 hover:text-red-300 hover:bg-red-950/30 transition-colors py-2 rounded-lg text-sm font-semibold tracking-wider">
+                        <span>🚪</span>
+                        <span>CERRAR SESIÓN</span>
+                    </button>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- INPUT DEL CHAT (Solo visible en Diario) -->
+        <div id="chatFooter" class="p-4 border-t border-slate-700 bg-slate-900/80">
+            <div class="flex items-end gap-2">
+                <div
+                    class="flex-1 flex items-start gap-2 text-amber-500 bg-black/20 p-2 rounded border border-slate-700/50">
+                    <span class="pt-2.5">></span>
+                    <textarea id="chatInput" class="sam-input placeholder-slate-600 resize-none overflow-y-auto max-h-40"
+                        rows="1" placeholder="Escribe tu gesta aquí..." autocomplete="off"></textarea>
+                </div>
+                <button id="sendGestaBtn"
+                    class="bg-amber-600 hover:bg-amber-500 text-black font-bold p-2 px-4 rounded shadow-lg transition-transform active:scale-95 flex items-center justify-center h-10">
+                    <span class="text-xs">ENVIAR</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- BARRA DE NAVEGACIÓN (TAB BAR) -->
+        <nav
+            class="bg-black/60 border-t border-amber-900/30 p-2 flex justify-around items-center rounded-b-xl backdrop-blur-md">
+            <button
+                class="nav-btn active group flex flex-col items-center gap-1 p-2 w-16 rounded hover:bg-white/5 transition-colors text-amber-500"
+                data-target="journal">
+                <span class="text-xl grayscale group-[.active]:grayscale-0 transition-all">📜</span>
+                <span class="text-[9px] font-bold tracking-wider opacity-50 group-[.active]:opacity-100">DIARIO</span>
+            </button>
+            <button
+                class="nav-btn group flex flex-col items-center gap-1 p-2 w-16 rounded hover:bg-white/5 transition-colors text-slate-500 hover:text-amber-500"
+                data-target="warRoom">
+                <span class="text-xl grayscale group-[.active]:grayscale-0 transition-all">&#x1F5FA;&#xFE0F;</span>
+                <span class="text-[9px] font-bold tracking-wider opacity-50 group-[.active]:opacity-100">MAPA</span>
+            </button>
+            <button
+                class="nav-btn group flex flex-col items-center gap-1 p-2 w-16 rounded hover:bg-white/5 transition-colors text-slate-500 hover:text-amber-500"
+                data-target="profile">
+                <span class="text-xl grayscale group-[.active]:grayscale-0 transition-all">&#x1F464;</span>
+                <span class="text-[9px] font-bold tracking-wider opacity-50 group-[.active]:opacity-100">PERFIL</span>
+            </button>
+            <button
+                class="nav-btn group flex flex-col items-center gap-1 p-2 w-16 rounded hover:bg-white/5 transition-colors text-slate-500 hover:text-amber-500"
+                data-target="backpack">
+                <span class="text-xl grayscale group-[.active]:grayscale-0 transition-all">🎒</span>
+                <span class="text-[9px] font-bold tracking-wider opacity-50 group-[.active]:opacity-100">MOCHILA</span>
+            </button>
+            <button
+                class="nav-btn group flex flex-col items-center gap-1 p-2 w-16 rounded hover:bg-white/5 transition-colors text-slate-500 hover:text-amber-500"
+                data-target="forge">
+                <span class="text-xl grayscale group-[.active]:grayscale-0 transition-all">⚒️</span>
+                <span class="text-[9px] font-bold tracking-wider opacity-50 group-[.active]:opacity-100">FORJA</span>
+            </button>
+            <button
+                class="nav-btn group flex flex-col items-center gap-1 p-2 w-16 rounded hover:bg-white/5 transition-colors text-slate-500 hover:text-amber-500"
+                data-target="achievementsTab">
+                <span class="text-xl grayscale group-[.active]:grayscale-0 transition-all">🏆</span>
+                <span class="text-[9px] font-bold tracking-wider opacity-50 group-[.active]:opacity-100">LOGROS</span>
+            </button>
+        </nav>
 
     </div>
 
@@ -135,502 +559,38 @@
         <button id="timeTravelBtn" class="bg-amber-600 text-black px-2 py-1 rounded">Viajar</button>
     </div>
 
+    <script src="client.js?v=2.0"></script>
+
+    <!-- Service Worker Registration & Easter Eggs -->
     <script>
-        // --- CONFIGURACIÓN DE ACCESO ---
-        const SUPABASE_URL = 'https://alehttakkwirudssxaru.supabase.co'; 
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsZWh0dGFra3dpcnVkc3N4YXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMTc1OTMsImV4cCI6MjA4NTY5MzU5M30.zLi9AqD1JkIGGLLUmb7bTg5a9ZAK2mFh3Mr_dslcDww'; 
-
-        // Inicialización del Cliente (FIX: Cambio de nombre para evitar colisión)
-        const { createClient } = window.supabase;
-        
-        // 🔴 CAMBIO AQUÍ: Usamos 'samClient' en lugar de 'supabase'
-        const samClient = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // Elementos del DOM
-        const chatInput = document.getElementById('chatInput');
-        const taskContainer = document.getElementById('taskContainer');
-        const userStatus = document.getElementById('userStatus');
-        const samReplyContainer = document.getElementById('samReplyContainer');
-        const gandalfModal = document.getElementById('gandalfModal');
-        const gandalfTaskList = document.getElementById('gandalfTaskList');
-        const sellarJuicioBtn = document.getElementById('sellarJuicioBtn');
-        // Elementos del Palantír
-        const palantirOrb = document.getElementById('palantirOrb');
-        const palantirAlerta = document.getElementById('palantirAlerta');
-        const palantirSugerencia = document.getElementById('palantirSugerencia');
-
-        // --- GESTIÓN DE TOKEN ---
-        async function obtenerToken() {
-            // 🔴 CAMBIO AQUÍ
-            const { data: { session } } = await samClient.auth.getSession();
-            if (!session) {
-                userStatus.textContent = "🔒 Acceso Restringido (Login requerido)";
-                userStatus.className = "text-xs text-red-400 font-bold";
-                return null;
-            }
-            userStatus.textContent = `👤 ${session.user.email}`;
-            userStatus.className = "text-xs text-green-400";
-            return session.access_token;
-        }
-
-        // --- FUNCIÓN DE LOGIN MANUAL ---
-        window.login = async (email, password) => {
-            console.log("🔐 Intentando acceder a la fortaleza...");
-            // 🔴 CAMBIO AQUÍ
-            const { data, error } = await samClient.auth.signInWithPassword({
-                email: email,
-                password: password
-            });
-            if (error) {
-                console.error("❌ Error Login:", error.message);
-                alert("Error: " + error.message);
-            } else {
-                console.log("✅ Login correcto. Bienvenido, Comandante.");
-                cargarMisiones();
-            }
-        };
-
-        // --- CARGAR MISIONES ---
-        async function cargarMisiones(mockDate = null) {
-            const token = await obtenerToken();
-            
-            if (!token) {
-                taskContainer.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-full text-center p-6">
-                        <div class="text-4xl mb-4">🛡️</div>
-                        <h2 class="text-xl text-red-400 mb-2">Acceso Denegado</h2>
-                        <p class="text-sm text-slate-400 mb-4">Necesitas el Sello del Rey para leer el libro.</p>
-                        <div class="bg-slate-800 p-3 rounded text-xs text-left w-full max-w-xs border border-slate-700">
-                            <p class="text-amber-500 mb-1">Escribe en la consola (F12):</p>
-                            <code class="text-green-400 select-all">login("tu@email.com", "tupassword")</code>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-
-            const url = mockDate ? `/api/tasks?mockDate=${mockDate.toISOString()}` : '/api/tasks';
-
-            try {
-                const res = await fetch(url, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (res.status === 401) {
-                    console.error("401: Token vencido");
-                    return;
-                }
-
-                const data = await res.json();
-                
-                if (data.success) {
-                    // SEPARAR TAREAS: Juicio de Gandalf vs. Gestas del día
-                    const nivelSombra = actualizarNivelSombra(data.tasks);
-                    
-                    const { tareasPendientesDeJuicio, tareasDeHoy } = separarTareas(data.tasks, nivelSombra);
-
-                    if (tareasPendientesDeJuicio.length > 0) {
-                        activarJuicioGandalf(tareasPendientesDeJuicio);
-                    } else {
-                        chatInput.disabled = false;
-                        gandalfModal.classList.add('hidden');
-                        // Saludo dinámico de Sam
-                        const saludoInicial = nivelSombra > 1 
-                            ? { reply: "Señor... la oscuridad es densa hoy. Debemos actuar." }
-                            : { reply: "¡Listo para la aventura, Señor Frodo! ¿Qué hazañas nos aguardan hoy?" };
-                        mostrarRespuestaSam([saludoInicial], true);
-                    }
-                    
-                    renderizarTareas(tareasDeHoy);
-                } else {
-                    console.error("Error del servidor:", data.error);
-                }
-            } catch (e) {
-                console.error("Error de red:", e);
-                taskContainer.innerHTML = '<p class="text-red-500 text-center">⚠️ Error de conexión con SAM Server</p>';
-            }
-        }
-
-        function esAnteriorAHoy(fecha) {
-            const fechaTarea = new Date(fecha);
-            const hoy = new Date();
-            // Ignoramos la hora, comparamos solo el día
-            hoy.setHours(0, 0, 0, 0);
-            return fechaTarea < hoy;
-        }
-
-        function separarTareas(tareas) {
-            const tareasPendientesDeJuicio = [];
-            const tareasDeHoy = [];
-
-            tareas.forEach(tarea => {
-                // Una tarea está pendiente de juicio si NO está completada, NO ha sido confirmada como fallida, Y es de un día anterior.
-                if (!tarea.is_completed && !tarea.fallo_confirmado && esAnteriorAHoy(tarea.created_at)) {
-                    tareasPendientesDeJuicio.push(tarea);
-                } else {
-                    tareasDeHoy.push(tarea);
-                }
-            });
-            return { tareasPendientesDeJuicio, tareasDeHoy };
-        }
-
-        function actualizarNivelSombra(tareas) {
-            const totalEnemigos = tareas.reduce((sum, tarea) => {
-                const horda = tarea.horda || { exploradores: 0, orcos: 0, urukhai: 0 };
-                return sum + horda.exploradores + horda.orcos + horda.urukhai;
-            }, 0);
-
-            const body = document.body;
-            body.classList.remove('shadow-level-1', 'shadow-level-2', 'shadow-level-3', 'shadow-vignette');
-
-            let nivelSombra = 0;
-            if (totalEnemigos >= 1 && totalEnemigos <= 5) {
-                body.classList.add('shadow-level-1');
-                nivelSombra = 1;
-            } else if (totalEnemigos >= 6 && totalEnemigos <= 15) {
-                body.classList.add('shadow-level-2');
-                nivelSombra = 2;
-            } else if (totalEnemigos > 15) {
-                body.classList.add('shadow-level-3');
-                body.classList.add('shadow-vignette');
-                nivelSombra = 3;
-            }
-            return nivelSombra; // Devolvemos el nivel para el saludo de Sam
-        }
-
-        // --- RENDERIZADO VISUAL ---
-        function renderizarTareas(tareas) {
-            taskContainer.innerHTML = '';
-            
-            if (!tareas || tareas.length === 0) {
-                taskContainer.innerHTML = `
-                    <div class="text-center mt-20 opacity-50">
-                        <p class="text-4xl mb-2">📜</p>
-                        <p class="italic">"El camino está despejado, Señor Frodo..."</p>
-                    </div>`;
-                return;
-            }
-
-            tareas.forEach(tarea => {
-                const horda = tarea.horda || { exploradores: 0, orcos: 0, urukhai: 0 };
-                
-                const card = document.createElement('div');
-                const esFallida = tarea.fallo_confirmado === true;
-
-                card.className = `bg-slate-800/80 p-4 rounded-lg border-l-4 shadow-lg transition-colors task-card ${esFallida ? 'task-card-failed' : 'border-amber-600 hover:bg-slate-800'}`;
-                card.dataset.taskId = tarea.id;
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h3 class="font-bold text-amber-100">${tarea.titulo_epico}</h3>
-                            <div class="flex gap-2 mt-1">
-                                <span class="text-[10px] uppercase bg-slate-900 px-2 py-0.5 rounded text-slate-400 border border-slate-700">${tarea.categoria}</span>
-                                ${esFallida ? `<span class="text-[10px] uppercase bg-red-900/50 px-2 py-0.5 rounded text-red-300 border border-red-800">Fallida</span>` : ''}
-                            </div>
-                        </div>
-                        <div class="flex gap-1 text-xs">
-                            <span class="horda-badge flex items-center gap-1 ${horda.exploradores > 0 ? 'text-green-400' : 'opacity-20'}">
-                                📍 ${horda.exploradores}
-                            </span>
-                            <span class="horda-badge flex items-center gap-1 ${horda.orcos > 0 ? 'text-orange-400 animate-pulse-agressive' : 'opacity-20'}">
-                                👹 ${horda.orcos}
-                            </span>
-                            <span class="horda-badge flex items-center gap-1 ${horda.urukhai > 0 ? 'text-purple-400 font-bold animate-pulse-agressive' : 'opacity-20'}">
-                                ⚔️ ${horda.urukhai}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="flex gap-2 mt-3 pt-2 border-t border-slate-700/50">
-                        <button onclick="juicioGandalf('${tarea.id}', 'exito')" class="flex-1 bg-green-900/30 hover:bg-green-700/50 text-green-300 text-xs py-1.5 rounded border border-green-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed" ${esFallida ? 'disabled' : ''}>
-                            ✅ Gesta Cumplida
-                        </button>
-                        <button onclick="juicioGandalf('${tarea.id}', 'fracaso')" class="flex-1 bg-red-900/30 hover:bg-red-700/50 text-red-300 text-xs py-1.5 rounded border border-red-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed" ${esFallida ? 'disabled' : ''}>
-                            🔥 Caída en Sombra
-                        </button>
-                    </div>
-                `;
-                taskContainer.appendChild(card);
-            });
-        }
-
-        function mostrarRespuestaSam(mensajes, esSaludo = false) {
-            // Si es un saludo, no limpiamos. Si es una respuesta, sí.
-            if (!esSaludo) {
-                samReplyContainer.innerHTML = ''; 
-            }
-            // Si el panel está vacío y es un saludo, lo mostramos.
-            if (esSaludo && samReplyContainer.innerHTML !== '') return; 
-
-            mensajes.forEach(msg => {
-                const p = document.createElement('p');
-                p.className = "text-amber-200 text-sm italic text-center";
-                p.innerHTML = `&ldquo;${msg.reply}&rdquo;`;
-                samReplyContainer.appendChild(p);
-            });
-        }
-
-        // --- LÓGICA DEL PALANTÍR ---
-        async function consultarPalantir() {
-            const token = await obtenerToken();
-            if(!token) return;
-
-            // 1. Chequeo de Caché (1 Hora)
-            const cacheKey = 'palantir_prediction';
-            const cacheTimeKey = 'palantir_timestamp';
-            const cachedPrediction = localStorage.getItem(cacheKey);
-            const cachedTime = localStorage.getItem(cacheTimeKey);
-            const ONE_HOUR = 60 * 60 * 1000;
-
-            if (cachedPrediction && cachedTime) {
-                const now = new Date().getTime();
-                if (now - parseInt(cachedTime) < ONE_HOUR) {
-                    console.log("🔮 Palantír: Usando visión retenida (Caché).");
-                    actualizarPalantir(JSON.parse(cachedPrediction));
-                    return;
-                }
-            }
-
-            // 2. Consulta a la API
-            try {
-                const res = await fetch('/api/palantir/predict', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-
-                if (data.success && data.prediction) {
-                    // Guardamos en caché
-                    localStorage.setItem(cacheKey, JSON.stringify(data.prediction));
-                    localStorage.setItem(cacheTimeKey, new Date().getTime().toString());
-                    
-                    actualizarPalantir(data.prediction);
-                }
-            } catch (err) {
-                console.error("El Palantír está nublado:", err);
-            }
-        }
-
-        function actualizarPalantir(prediction) {
-            const { probabilidad_fallo, alerta, sugerencia } = prediction;
-            
-            // Actualizar textos
-            palantirAlerta.textContent = alerta;
-            palantirSugerencia.textContent = `"${sugerencia}"`;
-
-            // Resetear clases
-            palantirOrb.className = "w-8 h-8 rounded-full border-2 border-white/20 flex items-center justify-center cursor-pointer palantir-orb transition-all duration-1000";
-            
-            // Determinar nivel de peligro
-            if (probabilidad_fallo <= 30) {
-                palantirOrb.classList.add('bg-blue-500');
-                palantirOrb.style.animationName = 'glow-blue';
-            } else if (probabilidad_fallo <= 70) {
-                palantirOrb.classList.add('bg-amber-500');
-                palantirOrb.style.animationName = 'glow-amber';
-            } else {
-                palantirOrb.classList.add('bg-red-600');
-                palantirOrb.style.animationName = 'glow-red';
-            }
-        }
-
-        // --- ENVIAR NUEVA MISIÓN ---
-        chatInput.addEventListener('keypress', async (e) => {
-            if (e.key === 'Enter') {
-                const text = chatInput.value;
-                if(!text.trim()) return;
-
-                chatInput.value = ''; 
-                const token = await obtenerToken();
-
-                if (!token) {
-                    alert("⚠️ ¡Alto ahí! Identifícate primero.");
-                    return;
-                }
-
-                const tempMsg = document.createElement('div');
-                tempMsg.className = "flex items-center justify-center gap-3 text-xs text-amber-500/50 italic p-2";
-                tempMsg.innerHTML = `
-                    <svg class="animate-spin h-5 w-5 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Afilando la pluma para el Libro Rojo...</span>
-                `;
-                taskContainer.prepend(tempMsg);
-
-                try {
-                    const res = await fetch('/api/briefing', {
-                        method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ userInput: text })
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then((reg) => {
+                        console.log('✅ Service Worker registrado exitosamente:', reg);
+                    })
+                    .catch((err) => {
+                        console.warn('⚠️ Error registrando Service Worker:', err);
                     });
-
-                    const data = await res.json();
-                    tempMsg.remove(); // Quitamos el mensaje de "enviando..."
-
-                    if (data.success && data.mensajes) {
-                        mostrarRespuestaSam(data.mensajes);
-                        // Esperamos un poco a que el usuario lea el mensaje antes de recargar
-                        setTimeout(() => {
-                            cargarMisiones(); 
-                        }, 2000); // 2 segundos de respiro
-                    } else {
-                        // Si falla, mostramos el error que pueda venir del backend
-                        const errorMsg = data.error || "La respuesta de Sam se perdió en el viento.";
-                        mostrarRespuestaSam([{ reply: errorMsg }]);
-                    }
-                } catch(err) {
-                    console.error(err);
-                    tempMsg.innerText = "❌ Error al contactar con Sam.";
-                    tempMsg.className = "text-xs text-red-500 p-2";
-                }
-            }
-        });
-
-        // --- LÓGICA DEL JUICIO DE GANDALF ---
-        let juiciosPendientes = {}; // { 'task-id': 'exito' | 'fracaso' }
-
-        function activarJuicioGandalf(tareas) {
-            console.log("¡Gandalf interrumpe! Tareas pendientes de juicio:", tareas);
-            chatInput.disabled = true;
-            chatInput.placeholder = "Debes resolver los asuntos pendientes...";
-            gandalfModal.classList.remove('hidden');
-            gandalfTaskList.innerHTML = ''; 
-            juiciosPendientes = {};
-
-            tareas.forEach(tarea => {
-                const div = document.createElement('div');
-                div.className = "p-3 bg-amber-100/50 rounded-md flex justify-between items-center";
-                div.innerHTML = `
-                    <span class="font-bold">${tarea.titulo_epico}</span>
-                    <div class="flex gap-2" data-task-id="${tarea.id}">
-                        <button class="gandalf-choice-btn bg-green-800 text-white px-3 py-1 rounded" data-verdict="exito">Éxito</button>
-                        <button class="gandalf-choice-btn bg-red-800 text-white px-3 py-1 rounded" data-verdict="fracaso">Fracaso</button>
-                    </div>
-                `;
-                gandalfTaskList.appendChild(div);
             });
         }
 
-        gandalfTaskList.addEventListener('click', (e) => {
-            if (e.target.classList.contains('gandalf-choice-btn')) {
-                const taskId = e.target.parentElement.dataset.taskId;
-                const verdict = e.target.dataset.verdict;
-                juiciosPendientes[taskId] = verdict;
-
-                // Feedback visual
-                e.target.parentElement.querySelectorAll('.gandalf-choice-btn').forEach(btn => {
-                    btn.classList.remove('ring-4', 'ring-white');
-                });
-                e.target.classList.add('ring-4', 'ring-white');
-            }
-        });
-
-        sellarJuicioBtn.addEventListener('click', async () => {
-            const successIds = Object.keys(juiciosPendientes).filter(id => juiciosPendientes[id] === 'exito');
-            const failureIds = Object.keys(juiciosPendientes).filter(id => juiciosPendientes[id] === 'fracaso');
-
-            if (successIds.length === 0 && failureIds.length === 0) {
-                alert("Debes emitir un juicio para cada asunto.");
-                return;
-            }
-
-            const token = await obtenerToken();
-            if(!token) return;
-
-            try {
-                await fetch('/api/gandalf/judge', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ successIds, failureIds })
-                });
-                gandalfModal.classList.add('hidden');
-                chatInput.disabled = false;
-                chatInput.placeholder = "Escribe tu gesta aquí, Frodo...";
-                cargarMisiones(); // Recargamos para ver el resultado
-            } catch (err) {
-                console.error("Error al sellar el juicio:", err);
-            }
-        });
-
-
-        // --- JUICIO DE GANDALF ---
-        window.juicioGandalf = async (id, veredicto) => {
-            const token = await obtenerToken();
-            if (!token) return;
-
-            const cardElement = document.querySelector(`[data-task-id="${id}"]`);
-
-            if (veredicto === 'fracaso') {
-                if (cardElement) {
-                    cardElement.classList.add('task-card-failed');
-                    const hordaContainer = cardElement.querySelector('.flex.gap-1.text-xs');
-                    if(hordaContainer) {
-                        hordaContainer.innerHTML += `<span class="text-xs text-red-400 animate-pulse">🌱</span>`;
-                    }
-                }
-            } else {
-                 if (cardElement) {
-                    cardElement.style.transition = 'opacity 0.5s';
-                    cardElement.style.opacity = '0';
-                    setTimeout(() => cardElement.remove(), 500);
-                }
-            }
-
-            const body = veredicto === 'exito' ? { successIds: [id] } : { failureIds: [id] };
-
-            try {
-                const res = await fetch('/api/gandalf/judge', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(body)
-                });
-                if (!res.ok) {
-                    // Si el backend falla, restauramos la UI para no mentir al usuario
-                    console.error("Fallo del Juicio en el backend. Revirtiendo UI.");
-                    cargarMisiones(); 
-                }
-                // Si el éxito fue real, la tarjeta ya ha sido eliminada o marcada.
-                // No es necesario un refresco completo, ahorramos una llamada de red.
-                
-            } catch (err) {
-                console.error("Error en el juicio:", err);
-                cargarMisiones(); // En caso de error de red, resincronizamos todo
-            }
+        // Easter Egg: Comando de créditos en consola
+        window.credits = function () {
+            console.clear();
+            console.log('%c═══════════════════════════════════════════════', 'color: #fbbf24; font-weight: bold');
+            console.log('%c🏆 S.A.M. - EL LIBRO ROJO', 'color: #fbbf24; font-size: 16px; font-weight: bold');
+            console.log('%c═══════════════════════════════════════════════', 'color: #fbbf24; font-weight: bold');
+            console.log('%cForjado por:', 'color: #e2e8f0; font-weight: bold');
+            console.log('%cJavier González Olivera', 'color: #fbbf24; font-size: 14px; font-weight: bold');
+            console.log('%c', 'color: #e2e8f0');
+            console.log('%cTrabajo Final de Máster 2026', 'color: #94a3b8; font-style: italic');
+            console.log('%c═══════════════════════════════════════════════', 'color: #fbbf24; font-weight: bold');
+            console.log('%c🗡️ "No todo lo que brilla es oro, pero toda gesta cuenta" - Gandalf', 'color: #cbd5e1; font-style: italic');
+            console.log('%c═══════════════════════════════════════════════', 'color: #fbbf24; font-weight: bold');
         };
-
-        // --- PANEL DE DESARROLLADOR ---
-        const devPanel = document.getElementById('devPanel');
-        const daysOffsetInput = document.getElementById('daysOffset');
-        const timeTravelBtn = document.getElementById('timeTravelBtn');
-
-        // Activamos el panel si la URL contiene ?dev=true
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('dev') === 'true') {
-            devPanel.classList.remove('hidden');
-        }
-
-        timeTravelBtn.addEventListener('click', () => {
-            const offset = parseInt(daysOffsetInput.value, 10);
-            const mockDate = new Date();
-            mockDate.setDate(mockDate.getDate() + offset);
-            
-            console.log(`⏳ Viajando en el tiempo a: ${mockDate.toLocaleDateString()}`);
-            cargarMisiones(mockDate);
-        });
-
-        // INICIO
-        cargarMisiones();
-        consultarPalantir(); // Invocamos al oráculo al inicio
-
     </script>
+
 </body>
+
 </html>

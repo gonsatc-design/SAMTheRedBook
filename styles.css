@@ -1,0 +1,462 @@
+/* =====================================================
+   S.A.M. - El Libro Rojo
+   Estilos principales
+   ===================================================== */
+
+body {
+    background-color: #0f172a;
+    color: #e2e8f0;
+    font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    position: relative;
+    background-image:
+        radial-gradient(circle at 20% 30%, rgba(180, 83, 9, 0.18) 0%, transparent 42%),
+        radial-gradient(circle at 80% 70%, rgba(30, 58, 138, 0.18) 0%, transparent 42%);
+    background-attachment: fixed;
+}
+
+body::before,
+body::after {
+    content: '';
+    position: fixed;
+    width: 280px;
+    height: 280px;
+    border-radius: 9999px;
+    pointer-events: none;
+    filter: blur(6px);
+    z-index: 0;
+}
+
+body::before {
+    top: 8%;
+    left: 8%;
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.12) 0%, transparent 70%);
+}
+
+body::after {
+    bottom: 10%;
+    right: 8%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+}
+
+.app-shell-premium {
+    border: 1px solid rgba(251, 191, 36, 0.24);
+    box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.65), 0 0 25px rgba(180, 83, 9, 0.08);
+    backdrop-filter: blur(14px);
+    z-index: 1;
+}
+
+.glass-panel {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sam-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    color: #fbbf24;
+    min-height: 2.25rem;
+    line-height: 1.35;
+    padding-top: 0.45rem;
+    padding-bottom: 0.45rem;
+}
+
+.horda-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+@keyframes pulse-agressive {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.7);
+    }
+
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 5px 3px rgba(255, 165, 0, 0);
+    }
+}
+
+.task-card-failed {
+    opacity: 0.5;
+    border-left-color: #991b1b;
+    /* red-900 */
+    transition: all 0.5s;
+}
+
+@keyframes glow-blue {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px #60a5fa, 0 0 10px #60a5fa;
+    }
+
+    50% {
+        box-shadow: 0 0 15px #60a5fa, 0 0 20px #3b82f6;
+    }
+}
+
+@keyframes glow-amber {
+
+    0%,
+    100% {
+        box-shadow: 0 0 7px #f59e0b, 0 0 12px #f59e0b;
+    }
+
+    50% {
+        box-shadow: 0 0 18px #f59e0b, 0 0 25px #d97706;
+    }
+}
+
+@keyframes glow-red {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px #f87171, 0 0 15px #f87171;
+    }
+
+    50% {
+        box-shadow: 0 0 25px #ef4444, 0 0 35px #dc2626;
+    }
+}
+
+.palantir-orb {
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+}
+
+.palantir-suggestion {
+    backdrop-filter: blur(8px);
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+    z-index: 50;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.palantir-container:hover .palantir-suggestion {
+    visibility: visible;
+    opacity: 1;
+}
+
+.sam-input:disabled {
+    color: #475569;
+}
+
+.gandalf-modal {
+    background-color: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid #b45309;
+    /* amber-700 */
+}
+
+.shadow-level-1 {
+    filter: brightness(0.95) saturate(0.9);
+}
+
+.shadow-level-2 {
+    filter: brightness(0.8) saturate(0.7) sepia(0.2);
+}
+
+.shadow-level-3 {
+    filter: brightness(0.7) saturate(0.6) sepia(0.4);
+}
+
+.shadow-vignette::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    box-shadow: inset 0 0 100px rgba(127, 29, 29, 0.7);
+    pointer-events: none;
+}
+
+.dev-panel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #fbbf24;
+    color: #fbbf24;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    z-index: 100;
+}
+
+.gandalf-scroll {
+    background-image: linear-gradient(to bottom, rgba(254, 243, 199, 0.9), rgba(252, 211, 77, 0.9));
+    color: #451a03;
+    /* amber-950 */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.war-room-panel {
+    background-image: radial-gradient(circle, rgba(15, 23, 42, 0.9) 0%, rgba(0, 0, 0, 0.95) 100%);
+    border: 1px solid #78350f;
+    /* amber-900 */
+}
+
+.hp-bar-container {
+    position: relative;
+    background: #3f3f46;
+    /* zinc-700 */
+    border: 2px solid #451a03;
+    /* amber-950 */
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+}
+
+.hp-bar-fill {
+    background: linear-gradient(90deg, #991b1b, #dc2626, #fca5a5);
+    /* red gradient */
+    box-shadow: 0 0 10px #ef4444;
+    transition: width 0.5s ease-out;
+}
+
+.light-bar-fill {
+    background: linear-gradient(90deg, #166534, #22c55e, #86efac);
+    /* green gradient */
+    box-shadow: 0 0 10px #22c55e;
+    transition: width 0.5s ease-out;
+}
+
+.hp-shake {
+    animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+@keyframes shake {
+
+    10%,
+    90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate3d(2px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(4px, 0, 0);
+    }
+}
+
+.vintage-grid {
+    background-image: linear-gradient(rgba(251, 191, 36, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(251, 191, 36, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+@keyframes flare {
+
+    0%,
+    100% {
+        opacity: 0.5;
+        filter: blur(2px);
+    }
+
+    50% {
+        opacity: 1;
+        filter: blur(0px);
+        text-shadow: 0 0 10px #f59e0b, 0 0 20px #ef4444;
+    }
+}
+
+.fire-particle {
+    position: absolute;
+    bottom: 0;
+    background: radial-gradient(circle, #f59e0b, #ef4444, transparent);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: fire-up 1s ease-out forwards;
+}
+
+@keyframes fire-up {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-30px) scale(0);
+        opacity: 0;
+    }
+}
+
+.balrog-sprite {
+    font-size: 2rem;
+    filter: drop-shadow(0 0 5px #ef4444);
+    animation: flare 2s infinite alternate;
+}
+
+#battleFeed {
+    max-height: 50px;
+    overflow-y: hidden;
+    mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+}
+
+.feed-msg {
+    animation: slide-in-top 0.3s ease-out;
+    font-size: 9px;
+    color: #fca5a5;
+    text-align: center;
+}
+
+@keyframes shine {
+    0% {
+        left: -100%;
+    }
+
+    20% {
+        left: 100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+.achievement-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.achievement-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(251, 191, 36, 0.1), transparent);
+    transform: skewX(-25deg);
+    animation: shine 4s infinite;
+}
+
+@keyframes slide-in-top {
+    0% {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* CORRECCIÓN SOLAPAMIENTO BARRA SAURON */
+#sauronHPContainer {
+    z-index: 10;
+    position: relative;
+    margin-bottom: 6px;
+}
+
+/* Badges Enemigos Completos */
+.badged-enemy {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 99px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Achievements Placeholder */
+.achievement-pill {
+    background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 0.65rem;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Radar Tooltip (Arriba) */
+.radar-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 8px;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid #64748b;
+    color: #fbbf24;
+    padding: 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    width: 180px;
+    text-align: center;
+    display: none;
+    z-index: 50;
+    pointer-events: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.radar-container:hover .radar-tooltip {
+    display: block;
+}
+
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 180px;
+}
+
+/* Navigation Button Active State */
+.nav-btn.active {
+    color: #fbbf24;
+}
+
+.nav-btn.active span:first-child {
+    filter: grayscale(0) !important;
+}
+
+.nav-btn.active span:last-child {
+    opacity: 1 !important;
+}
+
+.task-title {
+    font-size: 1.1rem;
+    line-height: 1.25;
+    font-weight: 800;
+}
+
+.task-desc {
+    font-size: 0.98rem;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.guide-panel {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.96));
+}
