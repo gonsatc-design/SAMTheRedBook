@@ -1,0 +1,538 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TFM Showcase - S.A.M. El Libro Rojo</title>
+    <meta name="description"
+        content="Showcase visual del TFM S.A.M. El Libro Rojo: tecnologías, diseño de IA, gamificación RPG, experimento social y arquitectura técnica.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-1: #030712;
+            --bg-2: #0f172a;
+            --gold: #fbbf24;
+            --gold-2: #d97706;
+            --line: rgba(251, 191, 36, 0.28);
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --panel: rgba(2, 6, 23, 0.78);
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            color: var(--text);
+            font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+            background:
+                radial-gradient(circle at 18% 14%, rgba(217, 119, 6, 0.2), transparent 40%),
+                radial-gradient(circle at 80% 76%, rgba(30, 64, 175, 0.22), transparent 44%),
+                linear-gradient(160deg, #111827 0%, #020617 100%);
+        }
+
+        .shell {
+            max-width: 1320px;
+            margin: 20px auto;
+            padding: 16px;
+        }
+
+        .hero {
+            border: 1px solid var(--line);
+            background: rgba(15, 23, 42, 0.72);
+            border-radius: 18px;
+            padding: 22px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.85);
+        }
+
+        .chip {
+            border: 1px solid var(--line);
+            color: var(--gold);
+            background: rgba(251, 191, 36, 0.1);
+            font-size: 11px;
+            padding: 5px 10px;
+            border-radius: 999px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 10px;
+            border: 1px solid var(--line);
+            color: var(--gold);
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: rgba(251, 191, 36, 0.08);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .layout {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: 290px 1fr;
+            gap: 14px;
+            min-height: 72vh;
+        }
+
+        @media (max-width: 980px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .menu {
+            border: 1px solid rgba(148, 163, 184, 0.26);
+            background: var(--panel);
+            border-radius: 16px;
+            padding: 12px;
+            position: sticky;
+            top: 12px;
+            height: fit-content;
+        }
+
+        .menu-title {
+            font-size: 11px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin: 4px 0 10px;
+            font-weight: 800;
+        }
+
+        .menu button {
+            width: 100%;
+            text-align: left;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(15, 23, 42, 0.72);
+            color: #cbd5e1;
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            transition: .2s;
+        }
+
+        .menu button:hover {
+            border-color: rgba(251, 191, 36, 0.45);
+            transform: translateX(2px);
+        }
+
+        .menu button.active {
+            border-color: var(--line);
+            background: linear-gradient(90deg, rgba(120, 53, 15, 0.34), rgba(15, 23, 42, 0.74));
+            color: #fff7d6;
+            font-weight: 700;
+        }
+
+        .viewer {
+            border: 1px solid rgba(148, 163, 184, 0.26);
+            background: var(--panel);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topline {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .topline h2 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+
+        .pager {
+            display: flex;
+            gap: 8px;
+        }
+
+        .pager button {
+            border: 1px solid rgba(251, 191, 36, 0.35);
+            background: rgba(251, 191, 36, 0.08);
+            color: #fde68a;
+            border-radius: 8px;
+            font-size: 12px;
+            padding: 6px 10px;
+            font-weight: 700;
+        }
+
+        .slide-wrap {
+            position: relative;
+            flex: 1;
+            min-height: 56vh;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: opacity .25s ease, transform .25s ease;
+            overflow: auto;
+            padding-right: 6px;
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        @media (max-width: 900px) {
+            .grid-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: rgba(2, 6, 23, 0.74);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .card h3 {
+            margin: 0 0 8px;
+            color: #f8fafc;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .card p,
+        .card li {
+            margin: 0;
+            color: var(--text);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .card ul {
+            margin: 0;
+            padding-left: 17px;
+            display: grid;
+            gap: 5px;
+        }
+
+        .flow {
+            margin-top: 12px;
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 8px;
+            align-items: center;
+        }
+
+        @media (max-width: 980px) {
+            .flow {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .flow-step {
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            background: rgba(120, 53, 15, 0.17);
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 12px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            color: #fcd34d;
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .footer-note {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="shell">
+        <section class="hero">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="chip">TFM</span>
+                <span class="chip">Master en Desarrollo con IA</span>
+                <span class="chip">BigSchool</span>
+                <span class="chip">MoureDev</span>
+            </div>
+            <h1 class="mt-4 text-3xl md:text-4xl font-black tracking-tight text-amber-300">S.A.M. EL LIBRO ROJO</h1>
+            <p class="mt-2 text-slate-300 text-sm md:text-base leading-relaxed">
+                Plataforma de productividad gamificada con IA, narrativa RPG y visualización táctica semanal.
+                Convierte tareas en gestas, traduce comportamiento en progreso visible y mejora la adherencia diaria.
+            </p>
+            <p class="mt-3 text-amber-200/90 text-sm md:text-base leading-relaxed">
+                Formato premium para lectura profesional: navegación por bloques, sin scroll eterno, con foco total en cada sección.
+            </p>
+            <a class="btn-back" href="index.html">Volver a la App</a>
+        </section>
+
+        <section class="layout">
+            <aside class="menu" id="menu"></aside>
+
+            <section class="viewer">
+                <div class="topline">
+                    <h2 id="activeTitle">Resumen</h2>
+                    <div class="pager">
+                        <button id="prevBtn" type="button">← Anterior</button>
+                        <button id="nextBtn" type="button">Siguiente →</button>
+                    </div>
+                </div>
+
+                <div class="slide-wrap" id="slides">
+                    <article class="slide active" data-title="Propuesta de valor">
+                        <div class="grid-cards">
+                            <div class="card">
+                                <h3>Problema real</h3>
+                                <p>Las apps de tareas convencionales registran actividad, pero no siempre consiguen que el usuario vuelva mañana. Se quedan en lista y check. Cuando baja la energía, se abandonan.</p>
+                                <p>S.A.M. ataca justo ese punto: transforma una tarea fría en una misión con sentido, acompaña con mensajes positivos y muestra consecuencias reales si te desconectas varios días.</p>
+                            </div>
+                            <div class="card">
+                                <h3>Solución aplicada</h3>
+                                <p>Entrada libre de tareas, IA que las convierte en gestas y respuesta inmediata al cerrar o fallar. Así el usuario no se pierde en la planificación y entra antes en acción.</p>
+                                <p>Además, todo está conectado a un objetivo mayor: avanzar con la comunidad hacia el Monte del Destino. Esa mezcla de progreso personal + meta compartida hace que la experiencia sea más adictiva y más útil.</p>
+                            </div>
+                        </div>
+                        <div class="flow">
+                            <div class="flow-step">Usuario escribe tarea</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">IA la convierte en gesta</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">Impacto en progreso global</div>
+                        </div>
+                    </article>
+
+                    <article class="slide" data-title="Tecnologías">
+                        <div class="grid-cards">
+                            <div class="card">
+                                <h3>Frontend</h3>
+                                <ul>
+                                    <li>HTML5, CSS3, JavaScript Vanilla y Tailwind CSS.</li>
+                                    <li>PWA con manifest y service worker.</li>
+                                    <li>Chart.js para analítica táctica por raza.</li>
+                                </ul>
+                            </div>
+                            <div class="card">
+                                <h3>Backend y datos</h3>
+                                <ul>
+                                    <li>Node.js + Express en API REST.</li>
+                                    <li>Supabase: PostgreSQL, Auth y Realtime.</li>
+                                    <li>JWT y persistencia temporal de misiones.</li>
+                                </ul>
+                            </div>
+                            <div class="card">
+                                <h3>IA aplicada</h3>
+                                <ul>
+                                    <li>Gemini para estructurar misiones.</li>
+                                    <li>Palantír predictivo con memoria reciente.</li>
+                                    <li>Cache por usuario para eficiencia.</li>
+                                </ul>
+                            </div>
+                            <div class="card">
+                                <h3>Tiempo real MMO-like</h3>
+                                <ul>
+                                    <li>Eventos globales sincronizados.</li>
+                                    <li>HUD de viaje actualizado por acciones reales.</li>
+                                    <li>Base preparada para world events escalables.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="slide" data-title="Experimento social">
+                        <div class="grid-cards">
+                            <div class="card">
+                                <h3>Hipótesis</h3>
+                                <p>La idea es sencilla: cuando una tarea se siente como una gesta, cuesta menos empezar y más fácil terminar. Si además el usuario ve al momento qué gana al cumplir y qué pasa si falla, mantiene mejor el ritmo durante la semana.</p>
+                                <p>No buscamos solo hacer check: buscamos crear hábito real. Por eso mezclamos historia, progreso visible y pequeñas recompensas que hacen que volver mañana tenga sentido.</p>
+                            </div>
+                            <div class="card">
+                                <h3>Lectura por razas</h3>
+                                <ul>
+                                    <li>Qué días rinde más cada raza.</li>
+                                    <li>Qué raza falla más y cuándo.</li>
+                                    <li>Media semanal por perfil elegido.</li>
+                                    <li>A qué hora suele completar mejor cada raza.</li>
+                                    <li>Qué raza recupera antes el ritmo tras un día malo.</li>
+                                </ul>
+                            </div>
+                            <div class="card">
+                                <h3>Insights vendibles</h3>
+                                <ul>
+                                    <li>Enano: +3 tareas/día vs Elfo.</li>
+                                    <li>Humano: mayor tasa de fallos a mitad de semana.</li>
+                                    <li>Hobbit: mejor consistencia de cierre.</li>
+                                </ul>
+                            </div>
+                            <div class="card">
+                                <h3>Objetivo colaborativo</h3>
+                                <p>El componente MMO aporta meta compartida: acercar el viaje al Monte del Destino y debilitar la oscuridad entre toda la comunidad.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="slide" data-title="RPG y UX">
+                        <div class="grid-cards">
+                            <div class="card">
+                                <h3>Microfeatures premium</h3>
+                                <ul>
+                                    <li>XP y subida de nivel con barra visible.</li>
+                                    <li>Forja con materiales obtenidos/total en BBDD.</li>
+                                    <li>Sistema de logros detallado y cuidado.</li>
+                                    <li>Popup de botín independiente con feedback al instante.</li>
+                                    <li>Mochila con etiquetas NEW por usuario para objetos recién obtenidos.</li>
+                                </ul>
+                            </div>
+                            <div class="card">
+                                <h3>Uso diario</h3>
+                                <p>S.A.M. está pensada para usarse cada día, incluso en días flojos. Entras, escribes una tarea en lenguaje normal y en segundos ya tienes una gesta clara para empezar.</p>
+                                <p>Cuando cumples, recibes refuerzo positivo real: avance, botín, XP y sensación de progreso. Cuando fallas, la app no te suelta la mano: te empuja a recuperar el ritmo con contexto y sin castigarte de forma absurda.</p>
+                                <p>La clave es esa: una rutina que se siente ligera, motivadora y sostenible en el tiempo.</p>
+                            </div>
+                            <div class="card">
+                                <h3>Componente social</h3>
+                                <p>Si un amigo juega con otra raza, se dispara la comparación saludable: ritmo semanal, farmeo, grindeo y progreso colectivo.</p>
+                            </div>
+                            <div class="card">
+                                <h3>Potencial visual</h3>
+                                <p>Mejora futura: sustituir emoticonos por iconografía temática de ESDLA para elevar más la inmersión sin perder claridad.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="slide" data-title="IA y Palantír">
+                        <div class="grid-cards">
+                            <div class="card">
+                                <h3>Capa generativa</h3>
+                                <p>Esta parte convierte lo que escribe el usuario en una misión clara y útil. Si alguien pone tengo mil cosas pendientes, la app lo baja a tierra en algo accionable: título entendible, objetivo concreto y un tono motivador.</p>
+                                <p>En resumen: transforma ideas sueltas en pasos que sí se pueden hacer hoy, sin que el usuario tenga que pensar demasiado cómo organizarlo.</p>
+                            </div>
+                            <div class="card">
+                                <h3>Capa predictiva</h3>
+                                <p>El Palantír detecta riesgo de fallo con patrones recientes y propone acciones concretas, no solo porcentajes.</p>
+                                <p>Ejemplo: tres fallos seguidos los jueves de la semana pasada -> el siguiente miércoles recomienda descansar bien para tener fuerzas al día siguiente.</p>
+                            </div>
+                            <div class="card">
+                                <h3>Motor de experiencia</h3>
+                                <p>La IA no está de adorno. Es la parte que hace que la app se sienta viva: adapta mensajes, acompaña con buen tono y ayuda a que el usuario no se hunda cuando encadena fallos.</p>
+                                <p>Gracias a eso, la experiencia es más humana, más positiva y más fácil de mantener día tras día.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="slide" data-title="Estado y roadmap">
+                        <div class="grid-cards">
+                            <div class="card">
+                                <h3>Estado actual</h3>
+                                <ul>
+                                    <li>Flujo completo onboarding -> misión -> juicio -> recompensa.</li>
+                                    <li>Perfil, inventario, forja y analítica funcionales.</li>
+                                    <li>Documentación técnica consolidada en `docs/tfm/`.</li>
+                                </ul>
+                            </div>
+                            <div class="card">
+                                <h3>Ambición futura</h3>
+                                <ul>
+                                    <li>Raids mensuales y objetivos anuales de comunidad.</li>
+                                    <li>Temporadas completas de world events.</li>
+                                    <li>Segmentación de IA por perfil conductual.</li>
+                                </ul>
+                                <p>Para TFM: diario/semanal está cerrado y defendible con solvencia.</p>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="slide" data-title="Mensaje del autor">
+                        <div class="card">
+                            <h3>De idea simple a app con alma</h3>
+                            <p>Me ha sorprendido muchísimo haber podido crear algo tan robusto. Sinceramente, no creo que lo hubiera logrado sin todo lo aprendido en el máster. Ahí entendí cómo usar bien distintas IAs como herramientas, pero siendo yo quien manda, quien decide y quien dirige todo el proceso como un director de orquesta.</p>
+                            <p>Siento que ahora ya podría hacer casi cualquier cosa en el mundo del desarrollo de apps. Me lo he pasado muy bien, aunque también he peleado con bugs a tope, muchísimos bugs, y con errores míos por no tener copias de seguridad o por trabajar desde main en vez de tirar de branch.</p>
+                            <p>Aun así, me he divertido, me he motivado y he metido todo lo que he podido sin romper el proyecto. Quise hacer refactorizaciones más grandes, pero los modelos de IA de los que dispongo muchas veces fallaban a mitad del proceso y tocó priorizar entrega estable.</p>
+                            <p>Esto es lo que entrego para el 23 de febrero de 2026. Y aunque lo entregue así, me quedo con ganas reales de seguir mejorándola por mi cuenta, por hobby y porque me considero Developer. Si lo puedes imaginar, lo puedes programar.</p>
+                            <h3 class="mt-4">Invitación final</h3>
+                            <p>La mejor forma de entender todo esto es usar la app unos días: crear gestas, completarlas, fallar alguna, ver cómo reacciona S.A.M. y notar cómo cambia tu constancia. Ahí se entiende de verdad el valor del proyecto.</p>
+                        </div>
+                    </article>
+                </div>
+
+                <p class="footer-note">Documento visual de apoyo al TFM. Navega por secciones desde el menú lateral o con los botones de paginación.</p>
+            </section>
+        </section>
+    </main>
+
+    <script>
+        const slides = Array.from(document.querySelectorAll('.slide'));
+        const menu = document.getElementById('menu');
+        const activeTitle = document.getElementById('activeTitle');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        let index = 0;
+
+        function renderMenu() {
+            menu.innerHTML = '<div class="menu-title">Mapa de Secciones</div>' + slides.map((s, i) => {
+                const t = s.dataset.title || `Sección ${i + 1}`;
+                return `<button type="button" data-idx="${i}" class="${i === index ? 'active' : ''}">${String(i + 1).padStart(2, '0')} · ${t}</button>`;
+            }).join('');
+
+            menu.querySelectorAll('button[data-idx]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    index = Number(btn.dataset.idx);
+                    render();
+                });
+            });
+        }
+
+        function render() {
+            slides.forEach((s, i) => s.classList.toggle('active', i === index));
+            activeTitle.textContent = slides[index].dataset.title || 'Sección';
+            renderMenu();
+        }
+
+        prevBtn.addEventListener('click', () => {
+            index = (index - 1 + slides.length) % slides.length;
+            render();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            index = (index + 1) % slides.length;
+            render();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') prevBtn.click();
+            if (e.key === 'ArrowRight') nextBtn.click();
+        });
+
+        render();
+    </script>
+</body>
+
+</html>
