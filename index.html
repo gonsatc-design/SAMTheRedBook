@@ -123,138 +123,44 @@
         <div id="raceSelectionModal"
             class="hidden absolute inset-0 z-[100] bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center">
             <h2 id="raceModalTitle" class="text-2xl font-bold text-amber-500 mb-2">¿ERES EL PORTADOR DEL ANILLO?</h2>
-            <p id="raceModalSubtitle" class="text-xs text-slate-400 mb-8 italic">Solo Sam (S.A.M.) te acompaña y registrará tus gestas. En
-                tus manos está el destino.</p>
+            <p id="raceModalSubtitle" class="text-xs text-slate-400 mb-4">
+                Aventura épica te espera. Pero primero, elige tu raza:
+            </p>
+            <div class="grid grid-cols-2 gap-4 w-full max-w-md mx-auto">
+                <!-- Botones de selección de raza (4 botones) -->
+                <button id="selectHuman"
+                    class="race-select-btn group relative flex flex-col items-center justify-center p-4 rounded-lg border-2 border-transparent transition-all duration-300">
+                    <span class="absolute inset-0 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 opacity-30"></span>
+                    <span class="text-4xl mb-2">👤</span>
+                    <span class="text-sm font-bold uppercase tracking-widest text-amber-300">Humano</span>
+                </button>
 
-            <div class="grid grid-cols-2 gap-4 w-full max-w-md">
-                <button
-                    class="race-opt p-4 glass-panel rounded-lg border border-slate-700 hover:border-amber-500 transition-all flex flex-col items-center group"
-                    data-race="Humano">
-                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">🗡️</span>
-                    <span class="font-bold text-amber-100">HUMANO</span>
-                    <span class="text-[9px] text-slate-500 mt-1">Senda del Rey</span>
+                <button id="selectElf"
+                    class="race-select-btn group relative flex flex-col items-center justify-center p-4 rounded-lg border-2 border-transparent transition-all duration-300">
+                    <span class="absolute inset-0 rounded-lg bg-gradient-to-br from-green-500 to-green-700 opacity-30"></span>
+                    <span class="text-4xl mb-2">🧝‍♂️</span>
+                    <span class="text-sm font-bold uppercase tracking-widest text-emerald-300">Elfo</span>
                 </button>
-                <button
-                    class="race-opt p-4 glass-panel rounded-lg border border-slate-700 hover:border-amber-500 transition-all flex flex-col items-center group"
-                    data-race="Elfo">
-                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">🏹</span>
-                    <span class="font-bold text-amber-100">ELFO</span>
-                    <span class="text-[9px] text-slate-500 mt-1">Senda Inmortal</span>
+
+                <button id="selectDwarf"
+                    class="race-select-btn group relative flex flex-col items-center justify-center p-4 rounded-lg border-2 border-transparent transition-all duration-300">
+                    <span class="absolute inset-0 rounded-lg bg-gradient-to-br from-red-500 to-red-700 opacity-30"></span>
+                    <span class="text-4xl mb-2">🧙‍♂️</span>
+                    <span class="text-sm font-bold uppercase tracking-widest text-orange-300">Enano</span>
                 </button>
-                <button
-                    class="race-opt p-4 glass-panel rounded-lg border border-slate-700 hover:border-amber-500 transition-all flex flex-col items-center group"
-                    data-race="Enano">
-                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">⚒️</span>
-                    <span class="font-bold text-amber-100">ENANO</span>
-                    <span class="text-[9px] text-slate-500 mt-1">Senda de Piedra</span>
-                </button>
-                <button
-                    class="race-opt p-4 glass-panel rounded-lg border border-slate-700 hover:border-amber-500 transition-all flex flex-col items-center group"
-                    data-race="Hobbit">
-                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">🍄</span>
-                    <span class="font-bold text-amber-100">HOBBIT</span>
-                    <span class="text-[9px] text-slate-500 mt-1">Senda del Hogar</span>
+
+                <button id="selectHobbit"
+                    class="race-select-btn group relative flex flex-col items-center justify-center p-4 rounded-lg border-2 border-transparent transition-all duration-300">
+                    <span class="absolute inset-0 rounded-lg bg-gradient-to-br from-yellow-500 to-yellow-700 opacity-30"></span>
+                    <span class="text-4xl mb-2">🧙‍♀️</span>
+                    <span class="text-sm font-bold uppercase tracking-widest text-yellow-300">Hobbit</span>
                 </button>
             </div>
+
+            <p class="text-[10px] text-slate-400 mt-2">
+                Reinicio semanal automático: domingo a las 23:59.
+            </p>
         </div>
-
-        <!-- Panel Persistente del Mensaje de Sam -->
-        <div id="samReplyContainer" class="p-2 border-b border-slate-700"></div>
-
-        <!-- BARRA DE PROGRESO DEL VIAJE (HUD) -->
-        <div id="sauronHPContainer"
-            class="px-4 py-3 bg-black/60 border-b border-red-900/50 hidden relative overflow-hidden">
-            <!-- Partículas de fuego se inyectarán aquí -->
-            <div id="fireContainer" class="absolute inset-0 pointer-events-none"></div>
-
-            <div class="flex items-center gap-4 mb-2 relative z-10">
-                <div class="balrog-sprite" id="bossIcon">&#x1F30B;</div>
-                <div class="flex-1">
-                    <div class="flex justify-between items-end mb-1">
-                        <span class="text-[10px] text-red-500 font-bold tracking-widest uppercase" id="bossName">Distancia
-                            hasta llegar al Monte del Destino</span>
-                        <span id="sauronHPText" class="text-[10px] text-red-400 font-mono">100% restante</span>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <div id="journeyBarTrack" class="relative w-full">
-                            <div class="hp-bar-container h-3 rounded-sm w-full">
-                                <div id="sauronHPBar" class="hp-bar-fill h-full w-full"></div>
-                            </div>
-                            <div id="journeyProgressMarker"
-                                class="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/2 flex items-center gap-1 text-[10px] leading-none pointer-events-none z-20 bg-black/65 px-1.5 py-0.5 rounded-full border border-amber-700/50">
-                                <span id="journeyRaceIcon" title="Raza del Portador">&#x1F464;</span>
-                                <span id="journeyRingIcon" title="Anillo Único">&#x1F48D;</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-        </div>
-
-        <!-- VISTA DE MISIONES (Default) -->
-        <main id="taskContainer"
-            class="flex-1 px-3 py-2 overflow-y-auto space-y-2 custom-scrollbar transition-opacity duration-300">
-            <div class="text-center mt-20 text-slate-600 animate-pulse">
-                Consultando el Libro Rojo...
-            </div>
-        </main>
-
-        <!-- VISTA DE SALA DE GUERRA (Oculta por defecto) -->
-        <main id="warRoomContainer"
-            class="hidden flex-1 p-4 overflow-y-auto custom-scrollbar vintage-grid war-room-panel relative">
-            <h2 class="text-center text-amber-600 font-bold mb-4 tracking-[0.2em] border-b border-amber-900/30 pb-2">
-                MAPA TÁCTICO</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <!-- HUMANO -->
-                <div class="bg-slate-900/80 p-3 rounded border border-slate-700 shadow-lg">
-                    <h3 class="text-xs text-amber-500 mb-2 text-center uppercase">Semana de Humano</h3>
-                    <div class="relative h-48">
-                        <canvas id="raceChartHumano"></canvas>
-                    </div>
-                </div>
-
-                <!-- ELFO -->
-                <div class="bg-slate-900/80 p-3 rounded border border-slate-700 shadow-lg">
-                    <h3 class="text-xs text-emerald-400 mb-2 text-center uppercase">Semana de Elfo</h3>
-                    <div class="relative h-48">
-                        <canvas id="raceChartElfo"></canvas>
-                    </div>
-                </div>
-
-                <!-- ENANO -->
-                <div class="bg-slate-900/80 p-3 rounded border border-slate-700 shadow-lg">
-                    <h3 class="text-xs text-orange-300 mb-2 text-center uppercase">Semana de Enano</h3>
-                    <div class="relative h-48">
-                        <canvas id="raceChartEnano"></canvas>
-                    </div>
-                </div>
-
-                <!-- HOBBIT -->
-                <div class="bg-slate-900/80 p-3 rounded border border-slate-700 shadow-lg">
-                    <h3 class="text-xs text-yellow-300 mb-2 text-center uppercase">Semana de Hobbit</h3>
-                    <div class="relative h-48">
-                        <canvas id="raceChartHobbit"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-center text-[10px] text-slate-500 italic mt-4">
-                "Los datos se actualizan con cada amanecer..."
-            </div>
-            <div class="mt-3 rounded border border-slate-700/50 bg-black/20 p-3">
-                <p class="text-[11px] text-slate-300 leading-relaxed">
-                    Aquí ves la guerra semanal por razas. Cada gráfica muestra de lunes a domingo
-                    las gestas cumplidas frente a las fallidas para Humano, Elfo, Enano y Hobbit.
-                </p>
-                <p class="text-[10px] text-slate-400 mt-2">
-                    Reinicio semanal automático: domingo a las 23:59.
-                </p>
-            </div>
-        </main>
 
         <!-- VISTA DE MOCHILA -->
         <main id="backpackContainer" class="hidden flex-1 p-4 overflow-y-auto custom-scrollbar vintage-grid">
@@ -558,7 +464,7 @@
         <button id="timeTravelBtn" class="bg-amber-600 text-black px-2 py-1 rounded">Viajar</button>
     </div>
 
-    <script src="js/frontend/client.js?v=2.0"></script>
+    <script src="js/frontend/client.js?v=10minfix"></script>
 
     <!-- Service Worker Registration & Easter Eggs -->
     <script>

@@ -1,23 +1,33 @@
-// --- CONFIGURACIÓN DE ACCESO ---
+// ===================================================================================
+// CONFIGURACIÓN Y VARIABLES GLOBALES
+// ===================================================================================
 const SUPABASE_URL = 'https://alehttakkwirudssxaru.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsZWh0dGFra3dpcnVkc3N4YXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMTc1OTMsImV4cCI6MjA4NTY5MzU5M30.zLi9AqD1JkIGGLLUmb7bTg5a9ZAK2mFh3Mr_dslcDww';
+
+const API_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+    ? 'http://localhost:3000'
+    : 'https://samtheredbook.onrender.com';
+
+const { createClient } = window.supabase;
+const samClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+let userToken = localStorage.getItem('userToken');
 
 // ===================================================================================
 // CONFIGURACIÓN CENTRAL
 // ===================================================================================
 // Esta es la dirección de tu servidor. En local, es localhost. 
 // En producción, DEBE ser la URL que te dio Render.
-const API_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
-    ? 'http://localhost:3000'
-    : 'https://samtheredbook.onrender.com'; // <-- URL de Render
+// const API_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+//     ? 'http://localhost:3000'
+//     : 'https://samtheredbook.onrender.com'; // <-- URL de Render
 
-let userToken = localStorage.getItem('userToken');
+// let userToken = localStorage.getItem('userToken');
 
 // ELIMINADO: API_BASE ya no es necesario, usamos API_URL para todo.
 
 // Inicialización del Cliente
-const { createClient } = window.supabase;
-const samClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+// const { createClient } = window.supabase;
+// const samClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // --- GUARDIÁN DE AUTENTICACIÓN ---
 // Se ejecuta al cargar la página. Si no hay token, redirige al login.
@@ -138,13 +148,12 @@ function autoResizeChatInput() {
 }
 
 // ===================================================================================
-// SECCIÓN 1: DEFINICIÓN DE FUNCIONES PRINCIPALES
+// SECCIÓN 1: DEFINICIÓN DE FUNCIONES
 // ===================================================================================
 
 async function obtenerToken() {
     const { data: { session } } = await samClient.auth.getSession();
-    if (!session) return null;
-    return session.access_token;
+    return session ? session.access_token : null;
 }
 
 // --- FUNCIÓN DE LOGIN MANUAL ---
@@ -225,14 +234,20 @@ async function cargarMisiones(mockDate) {
 }
 
 async function enviarChat() {
-    // ... (código de la función enviarChat)
+    const text = chatInput.value;
+    if (!text.trim()) return;
+    const token = await obtenerToken();
+    if (!token) return;
+    // ... (resto de la lógica de enviarChat) ...
     try {
         const res = await fetch(`${API_URL}/api/briefing`, {
-            // ... (código de la llamada fetch) ...
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ userInput: text })
         });
-        // ... (resto de la función) ...
+        // ... (resto de la lógica) ...
     } catch (err) {
-        // ... (código de manejo de error) ...
+        console.error(err);
     }
 }
 
@@ -240,26 +255,12 @@ async function actualizarPerfilUsuario() {
     const token = await obtenerToken();
     if (!token) return;
     try {
-        const res = await fetch(`${API_URL}/api/profile/me`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        // ... (resto de la función) ...
+        const res = await fetch(`${API_URL}/api/profile/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error(res.status);
+        const data = await res.json();
+        // ... (resto de la lógica) ...
     } catch (e) {
         console.error("Error al cargar perfil RPG:", e);
-    }
-}
-
-async function consultarPalantir() {
-    const token = await obtenerToken();
-    if (!token) return;
-    // ... (código de la función) ...
-    try {
-        const res = await fetch(`${API_URL}/api/palantir/predict`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        // ... (resto de la función) ...
-    } catch (err) {
-        console.error("El Palantír está nublado:", err);
     }
 }
 
@@ -267,10 +268,10 @@ async function updateSauronHP() {
     const token = await obtenerToken();
     if (!token) return;
     try {
-        const res = await fetch(`${API_URL}/api/stats/global`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        // ... (resto de la función) ...
+        const res = await fetch(`${API_URL}/api/stats/global`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error(res.status);
+        const data = await res.json();
+        // ... (resto de la lógica) ...
     } catch (error) {
         console.error("Error conectando con el Frente Global:", error);
     }
@@ -318,14 +319,8 @@ async function init() {
         await Promise.all([
             cargarMisiones(),
             actualizarPerfilUsuario(),
-            updateSauronHP(),
-            consultarPalantir(),
-            // renderDedicatedAchievements(), // Asumimos que esta función existe
-            // setupRealtime() // Asumimos que esta función existe
+            updateSauronHP()
+            // , consultarPalantir() // Comentado para simplificar la carga inicial
         ]);
-
-        // Carga secundaria
-        // cargarInventario();
-        // cargarRecetas();
     }
 }
