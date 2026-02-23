@@ -2,6 +2,15 @@
 const SUPABASE_URL = 'https://alehttakkwirudssxaru.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsZWh0dGFra3dpcnVkc3N4YXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMTc1OTMsImV4cCI6MjA4NTY5MzU5M30.zLi9AqD1JkIGGLLUmb7bTg5a9ZAK2mFh3Mr_dslcDww';
 
+// ===================================================================================
+// CONFIGURACIÓN CENTRAL
+// ===================================================================================
+const API_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+    ? 'http://localhost:3000'
+    : 'https://tu-url-de-render-aqui'; // <-- ¡IMPORTANTE! Pega aquí tu URL de Render
+
+let userToken = localStorage.getItem('userToken');
+
 // --- CONFIGURACIÓN DE RED (AUTO-DETECT) ---
 // Si estamos en archivo local (file://), apuntamos a localhost:3000
 // Si estamos en servidor (http://), usamos ruta relativa
@@ -164,191 +173,182 @@ const FRASES_SAM = [
 ];
 
 const FRASES_SIN_MISIONES_ACTIVAS = [
-    "Has despejado el frente por ahora. Si aún te queda energía, escribe una gesta pequeña y avanza un paso más hacia el Monte del Destino.",
-    "Buen trabajo: no quedan misiones activas en este momento. ¿Quieres cerrar el día aquí o dejar una nueva gesta lista para mañana?",
-    "El camino está tranquilo, pero la travesía continúa. Una misión breve ahora puede evitar que la sombra gane terreno después.",
-    "Hoy has sostenido la línea con firmeza. Si tienes algo pendiente, conviértelo en gesta y déjalo sellado en el Libro Rojo."
+    "Has despejado el frente por ahora. Si aún te queda energía, escribe una gesta pequeña// --- CONFIGURACIÓN DE ACCESO ---
+const SUPABASE_URL = 'https://alehttakkwirudssxaru.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsZWh0dGFra3dpcnVkc3N4YXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMTc1OTMsImV4cCI6MjA4NTY5MzU5M30.zLi9AqD1JkIGGLLUmb7bTg5a9ZAK2mFh3Mr_dslcDww';
+
+// ===================================================================================
+// CONFIGURACIÓN CENTRAL
+// ===================================================================================
+const API_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+    ? 'http://localhost:3000'
+    : 'https://tu-url-de-render-aqui'; // <-- ¡IMPORTANTE! Pega aquí tu URL de Render
+
+let userToken = localStorage.getItem('userToken');
+
+// --- CONFIGURACIÓN DE RED (AUTO-DETECT) ---
+// Si estamos en archivo local (file://), apuntamos a localhost:3000
+// Si estamos en servidor (http://), usamos ruta relativa
+const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
+
+// Inicialización del Cliente
+const { createClient } = window.supabase;
+const samClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Función Global para Cerrar Sesión (disponible de inmediato)
+window.logoutUser = async function (btn) {
+    if (!btn) btn = { textContent: '', disabled: false };
+    const originalText = btn.textContent;
+    btn.textContent = '🚪 Saliendo...';
+    btn.disabled = true;
+    try {
+        await samClient.auth.signOut();
+        window.location.href = 'login.html';
+    } catch (err) {
+        console.error("❌ Error al cerrar sesión:", err);
+        btn.disabled = false;
+        btn.textContent = originalText;
+        alert("No se pudo cerrar la sesión: " + err.message);
+    }
+};
+
+// Elementos del DOM
+const chatInput = document.getElementById('chatInput');
+const taskContainer = document.getElementById('taskContainer');
+const userStatus = document.getElementById('userStatus') || null;  // Removido del header
+const samReplyContainer = document.getElementById('samReplyContainer');
+const gandalfModal = document.getElementById('gandalfModal');
+const gandalfTaskList = document.getElementById('gandalfTaskList');
+const sellarJuicioBtn = document.getElementById('sellarJuicioBtn');
+// Elementos del Palantír
+const palantirOrb = document.getElementById('palantirOrb');
+const palantirAlerta = document.getElementById('palantirAlerta');
+const palantirSugerencia = document.getElementById('palantirSugerencia');
+
+// --- RPG HUD ELEMENTS (BLOQUE 0) ---
+// NOTA: playerLevel, playerTitle, playerGold fueron movidos del header al PERFIL
+const playerLevel = document.getElementById('playerLevel');  // Podría ser null
+const playerTitle = document.getElementById('playerTitle');  // Podría ser null
+const playerRace = document.getElementById('playerRace');
+const raceSelectionModal = document.getElementById('raceSelectionModal');
+const raceModalTitle = document.getElementById('raceModalTitle');
+const raceModalSubtitle = document.getElementById('raceModalSubtitle');
+const changeRaceBtn = document.getElementById('changeRaceBtn');
+
+// --- CONTROL GLOBAL ---
+let raceModalShownOnce = false;  // Bandera para mostrar modal solo una vez
+
+function normalizeRaceClient(race) {
+    const map = {
+        'Humanos': 'Humano',
+        'Elfos': 'Elfo',
+        'Enanos': 'Enano',
+        'Hobbits': 'Hobbit',
+        'Humano': 'Humano',
+        'Elfo': 'Elfo',
+        'Enano': 'Enano',
+        'Hobbit': 'Hobbit'
+    };
+    return map[race] || race || null;
+}
+
+// --- RAID HUD ELEMENTS ---
+const raidWidget = document.getElementById('sauronHPContainer');
+const sauronHPBar = document.getElementById('sauronHPBar');
+const sauronHPText = document.getElementById('sauronHPText');
+const bossName = document.getElementById('bossName');
+const bossIcon = document.getElementById('bossIcon');
+const journeyRaceIcon = document.getElementById('journeyRaceIcon');
+const journeyProgressMarker = document.getElementById('journeyProgressMarker');
+const battleFeed = document.getElementById('battleFeed');
+const fireEventsContainer = document.getElementById('fireEvents');
+const playerGold = document.getElementById('playerGold');  // Podría ser null
+
+function getRaceIcon(race) {
+    const raceIcons = { 'Humano': '🗡️', 'Elfo': '🏹', 'Enano': '⚒️', 'Hobbit': '🍄' };
+    return raceIcons[normalizeRaceClient(race)] || '👤';
+}
+
+// --- NAVEGACIÓN Y TABS ---
+const navBtns = document.querySelectorAll('.nav-btn');
+const chatFooter = document.getElementById('chatFooter');
+const profileEmail = document.getElementById('profileEmail');
+
+const containers = {
+    journal: document.getElementById('taskContainer'),
+    warRoom: document.getElementById('warRoomContainer'),
+    profile: document.getElementById('profileContainer'),
+    backpack: document.getElementById('backpackContainer'),
+    forge: document.getElementById('forgeContainer'),
+    achievementsTab: document.getElementById('achievementsTab')
+};
+
+// Elementos de la Mochila
+const inventoryGrid = document.getElementById('inventoryGrid');
+const emptyInventory = document.getElementById('emptyInventory');
+const itemDetailModal = document.getElementById('itemDetailModal');
+const sendGestaBtn = document.getElementById('sendGestaBtn');
+
+let previousSauronHP = null;
+let realtimeChannel = null;
+let pendingRaceModalAfterGuide = false;
+let pendingGuideStorageKey = null;
+let raceSelectionMode = 'onboarding';
+const RACE_CHANGE_COST = 1000000;
+let journeyEventActive = false;
+
+function autoResizeChatInput() {
+    if (!chatInput) return;
+    chatInput.style.height = 'auto';
+    chatInput.style.height = `${Math.min(chatInput.scrollHeight, 160)}px`;
+}
+
+// --- GESTIÓN DE TOKEN ---
+async function obtenerToken() {
+    const { data: { session } } = await samClient.auth.getSession();
+    if (!session) {
+        // userStatus fue removido del header - ahora solo en PERFIL
+        return null;
+    }
+    // userStatus ya no existe - feedback ahora en PERFIL
+    return session.access_token;
+}
+
+// --- FUNCIÓN DE LOGIN MANUAL ---
+window.login = async (email, password) => {
+    console.log("🔐 Intentando acceder a la fortaleza...");
+    const { data, error } = await samClient.auth.signInWithPassword({
+        email: email,
+        password: password
+    });
+    if (error) {
+        console.error("❌ Error Login:", error.message);
+        alert("Error: " + error.message);
+    } else {
+        console.log("✅ Login correcto. Bienvenido, Comandante.");
+        cargarMisiones();
+    }
+};
+
+// --- FRASES ALEATORIAS MIENTRAS SAM PIENSA ---
+const FRASES_SAM = [
+    "Afilando la pluma para el Libro Rojo...",
+    "Consultando las Memorias de Elrond...",
+    "Buscando en los Anales de la Tierra Media...",
+    "El destino toma forma en las manos del sabio...",
+    "Escudriñando los secretos del futuro...",
+    "El Palantír revela su verdad...",
+    "Tejiendo el hilo de tu destino...",
+    "Las antiguas palabras se despiertan...",
+    "El poder del Anillo hace su voluntad...",
+    "Compilando tus gestas en el Libro...",
+    "Pidiendo consejo a Gandalf...",
+    "Los Valar escuchan tu llamada...",
+    "La Tierra Media espera tu respuesta...",
 ];
 
-function obtenerFraseSamAleatoria() {
-    return FRASES_SAM[Math.floor(Math.random() * FRASES_SAM.length)];
-}
-async function cargarMisiones(mockDate = null) {
-    try {
-        const token = await obtenerToken();
-        if (!token) {
-            taskContainer.innerHTML = `
-                <div class="flex flex-col items-center justify-center h-full text-center p-6">
-                    <div class="text-4xl mb-4">🛡️</div>
-                    <h2 class="text-xl text-red-400 mb-2">Acceso Denegado</h2>
-                    <p class="text-sm text-slate-400 mb-4">Necesitas el Sello del Rey para leer el libro.</p>
-                </div>
-            `;
-            return;
-        }
-
-        const url = mockDate ? `${API_BASE}/api/tasks?mockDate=${mockDate.toISOString()}` : `${API_BASE}/api/tasks`;
-        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
-
-        if (res.status === 401) {
-            console.error("401: Token vencido");
-            return;
-        }
-
-        const data = await res.json();
-
-        if (data.success) {
-            const nivelSombra = actualizarNivelSombra(data.tasks || []);
-            const { tareasPendientesDeJuicio, tareasDeHoy } = separarTareas(data.tasks || []);
-
-            if (tareasPendientesDeJuicio.length > 0) {
-                activarJuicioGandalf(tareasPendientesDeJuicio);
-            } else {
-                chatInput.disabled = false;
-                gandalfModal.classList.add('hidden');
-                // Saludo dinámico de Sam
-                const saludoInicial = nivelSombra > 1
-                    ? { reply: "La oscuridad es densa hoy. Debemos actuar." }
-                    : { reply: "Listo para la aventura. ¿Qué hazañas nos aguardan hoy?" };
-                mostrarRespuestaSam([saludoInicial], true);
-            }
-
-            renderizarTareas(tareasDeHoy);
-            if (data.activeBuffs) renderActiveBuffs(data.activeBuffs);
-        }
-    } catch (e) {
-        console.error("Error carrgando misiones:", e);
-        taskContainer.innerHTML = '<p class="text-red-500 text-center">⚠️ Error de conexión con SAM Server</p>';
-    }
-}
-
-function esAnteriorAHoy(fecha) {
-    const fechaTarea = new Date(fecha);
-    const hoy = new Date();
-    // Ignoramos la hora, comparamos solo el día
-    hoy.setHours(0, 0, 0, 0);
-    return fechaTarea < hoy;
-}
-
-function separarTareas(tareas) {
-    const tareasPendientesDeJuicio = [];
-    const tareasDeHoy = [];
-
-    tareas.forEach(tarea => {
-        // Una tarea está pendiente de juicio si NO está completada, NO ha sido confirmada como fallida, Y es de un día anterior.
-        if (!tarea.is_completed && !tarea.fallo_confirmado && esAnteriorAHoy(tarea.created_at)) {
-            tareasPendientesDeJuicio.push(tarea);
-        } else {
-            tareasDeHoy.push(tarea);
-        }
-    });
-    return { tareasPendientesDeJuicio, tareasDeHoy };
-}
-
-// --- NOTIFICACIONES (TOAST) ---
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = 'sam-toast';
-
-    let icon = 'ℹ️';
-    if (type === 'success') icon = '✨';
-    if (type === 'error') icon = '💀';
-    if (type === 'warning') icon = '⚠️';
-
-    toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
-    container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(-20px)';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
-// 🎁 MOSTRAR RECOMPENSAS AL COMPLETAR TAREAS
-function mostrarRecompensas(rewards) {
-    if (!rewards || rewards.length === 0) return;
-
-    const container = document.getElementById('toastContainer');
-    const rewardsDiv = document.createElement('div');
-    rewardsDiv.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 translate-y-3 transition-all duration-300';
-
-    const rarityColors = {
-        'Común': 'from-slate-700/90 to-slate-800/90 border-slate-500/60',
-        'Raro': 'from-blue-700/90 to-blue-900/90 border-blue-400/60',
-        'Legendario': 'from-amber-700/90 to-orange-900/90 border-amber-300/70'
-    };
-
-    const rarityIcons = {
-        'Común': '⚪',
-        'Raro': '🔷',
-        'Legendario': '✨'
-    };
-
-    let html = `
-    <div class="bg-slate-950/90 backdrop-blur-xl rounded-xl border border-amber-700/50 p-3 w-[290px] shadow-2xl pointer-events-auto">
-        <h2 class="text-sm font-black text-amber-300 tracking-wide mb-2">BOTÍN RECIBIDO</h2>
-        <div class="space-y-2">
-    `;
-
-    rewards.forEach((reward, i) => {
-        // Validación: si no tiene rarity, asignar 'Común' por defecto
-        const rarity = reward.rarity || 'Común';
-        const colorGradient = rarityColors[rarity] || rarityColors['Común'];
-        const rarityIcon = rarityIcons[rarity] || '⚪';
-        const itemName = reward.item_name || 'Misterio Desconocido';
-
-        html += `
-        <div class="bg-gradient-to-r ${colorGradient} rounded-lg p-2 border">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="text-base">${rarityIcon}</span>
-                    <div>
-                        <p class="font-bold text-white text-xs leading-tight">${itemName}</p>
-                        <p class="text-[10px] text-white/70">${rarity}</p>
-                    </div>
-                </div>
-                <span class="text-xs font-bold text-white/90">+1</span>
-            </div>
-        </div>
-        `;
-    });
-
-    // Añadir oro si existe
-    const totalGold = rewards.reduce((sum, r) => sum + (r.gold || 0), 0);
-    if (totalGold > 0) {
-        html += `
-        <div class="bg-gradient-to-r from-yellow-800/90 to-amber-900/90 rounded-lg p-2 border border-yellow-500/60">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="text-base">💰</span>
-                    <div>
-                        <p class="font-bold text-yellow-100 text-xs">Oro</p>
-                        <p class="text-[10px] text-yellow-200/70">Recompensa</p>
-                    </div>
-                </div>
-                <span class="text-xs font-bold text-yellow-300">+${totalGold}</span>
-            </div>
-        </div>
-        `;
-    }
-
-    html += `
-        </div>
-    </div>
-    `;
-
-    rewardsDiv.innerHTML = html;
-    container.appendChild(rewardsDiv);
-
-    requestAnimationFrame(() => {
-        rewardsDiv.classList.remove('opacity-0', 'translate-y-2');
-    });
-
-    // Mostrar breve y desaparecer rápido
-    setTimeout(() => {
-        rewardsDiv.classList.add('opacity-0', 'translate-y-3');
+const FRASES_SIN_MISIONES_ACTIVAS = [
+    "Has despejado el frente por ahora. Si aún te queda energía, escribe una gesta pequeña
         setTimeout(() => rewardsDiv.remove(), 300);
     }, 1800);
 }

@@ -288,7 +288,12 @@ app.post('/api/briefing', authMiddleware, async (req, res) => {
     }
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`📜 El Libro Rojo se ha abierto en el puerto ${PORT}`);
+    console.log(`   -> MODO: ${process.env.NODE_ENV === 'production' ? 'PRODUCCIÓN (Cloud)' : 'DESARROLLO (Local)'}`);
+});
 
 
 // --- RUTA PARA LEER EL LIBRO (Obtener Misiones) ---
@@ -345,7 +350,6 @@ app.get('/api/tasks', authMiddleware, async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
-
 
 
 
