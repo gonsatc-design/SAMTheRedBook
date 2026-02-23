@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.A.M. — Acceso a la Fortaleza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --gold: #fbbf24;
+            --gold-dark: #b45309;
+            --slate-900: #0f172a;
+            --slate-950: #020617;
+        }
+
+        body {
+            background-color: var(--slate-950);
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .cinzel {
+            font-family: 'Cinzel', serif;
+        }
+
+        .bg-animate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(180, 83, 9, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(30, 58, 138, 0.15) 0%, transparent 40%);
+            z-index: -1;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(251, 191, 36, 0.4);
+            box-shadow: 0 0 30px rgba(180, 83, 9, 0.1);
+        }
+
+        .input-field {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: var(--gold);
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.1);
+            outline: none;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            color: black;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(217, 119, 6, 0.3);
+        }
+
+        .btn-gold:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(217, 119, 6, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .btn-gold:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .btn-gold:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #475569;
+            color: #94a3b8;
+        }
+
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(2px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-4px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(4px, 0, 0);
+            }
+        }
+
+        .floating-orb {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(251, 191, 36, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 20s infinite alternate;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(100px, 50px);
+            }
+        }
+
+        .mode-toggle {
+            cursor: pointer;
+            color: var(--gold);
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .mode-toggle:hover {
+            color: #fcd34d;
+        }
+
+        /* Estilo para el Ojo de Sauron / Anillo en el login */
+        .ring-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20rem;
+            opacity: 0.03;
+            pointer-events: none;
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body class="flex items-center justify-center">
+
+    <div class="bg-animate"></div>
+    <div class="floating-orb" style="top: 10%; left: 10%;"></div>
+    <div class="floating-orb" style="bottom: 10%; right: 10%; animation-delay: -5s;"></div>
+
+    <div class="ring-bg cinzel">O</div>
+
+    <div id="loginCard" class="glass-card w-full max-w-md mx-4 rounded-3xl p-8 relative z-10 overflow-hidden">
+
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-block p-4 rounded-full bg-amber-500/10 border border-amber-500/20 mb-4 animate-pulse">
+                <span class="text-5xl">📜</span>
+            </div>
+            <h1 id="title" class="text-3xl font-black cinzel tracking-[0.2em] text-amber-500">S.A.M.</h1>
+            <p class="text-xs text-slate-500 mt-2 uppercase tracking-widest italic">"Ni siquiera los más sabios conocen
+                el final de todos los caminos"</p>
+        </div>
+
+        <!-- Alert Box -->
+        <div id="alertBox"
+            class="hidden mb-6 p-4 rounded-xl border flex items-start gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+            <span id="alertIcon" class="mt-0.5"></span>
+            <p id="alertMsg" class="text-xs font-medium"></p>
+        </div>
+
+        <!-- Tabs Style for the user to understand what's happening -->
+        <div class="flex border-b border-slate-700/50 mb-8">
+            <button id="tabLogin"
+                class="flex-1 pb-3 text-sm font-bold uppercase tracking-widest border-b-2 border-amber-500 text-amber-500 transition-all">Acceder</button>
+            <button id="tabRegister"
+                class="flex-1 pb-3 text-sm font-bold uppercase tracking-widest border-b-2 border-transparent text-slate-500 hover:text-slate-300 transition-all">Forjar</button>
+        </div>
+
+        <div class="space-y-5">
+            <!-- Email / Nickname -->
+            <div id="inputGroupNickname">
+                <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 mb-2 block">Nombre en la
+                    Comarca</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">👤</span>
+                    <input id="nicknameInput" type="text" placeholder="Frodo, Sam, Gandalf..."
+                        class="input-field w-full pl-12 pr-4 py-3.5 rounded-xl text-sm" autocomplete="username">
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 mb-2 block">Palabra de
+                    Poder</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">🔑</span>
+                    <input id="passwordInput" type="password" placeholder="••••••••"
+                        class="input-field w-full pl-12 pr-12 py-3.5 rounded-xl text-sm"
+                        autocomplete="current-password">
+                    <button id="togglePass"
+                        class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-amber-500 transition-colors">👁️</button>
+                </div>
+            </div>
+
+            <!-- Botón Principal -->
+            <button id="actionBtn" class="btn-gold w-full py-4 rounded-xl mt-4 flex items-center justify-center gap-2">
+                <span>Continuar el Viaje</span>
+                <span id="spinner"
+                    class="hidden border-2 border-black/20 border-t-black rounded-full w-4 h-4 animate-spin"></span>
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 pt-6 border-t border-slate-700/50 text-center">
+            <p id="toggleText" class="text-xs text-slate-500">
+                ¿Aún no has sido registrado en los anales?
+                <span id="switchBtn" class="mode-toggle cursor-pointer" onclick="toggleMode(false)">Forjar una
+                    cuenta</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        const SUPABASE_URL = 'https://alehttakkwirudssxaru.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsZWh0dGFra3dpcnVkc3N4YXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMTc1OTMsImV4cCI6MjA4NTY5MzU5M30.zLi9AqD1JkIGGLLUmb7bTg5a9ZAK2mFh3Mr_dslcDww';
+
+        const { createClient } = window.supabase;
+        const samClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // State
+        let isLogin = true;
+
+        // Elements
+        const nicknameInput = document.getElementById('nicknameInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const actionBtn = document.getElementById('actionBtn');
+        const alertBox = document.getElementById('alertBox');
+        const alertMsg = document.getElementById('alertMsg');
+        const alertIcon = document.getElementById('alertIcon');
+        const spinner = document.getElementById('spinner');
+        const loginCard = document.getElementById('loginCard');
+        const tabLogin = document.getElementById('tabLogin');
+        const tabRegister = document.getElementById('tabRegister');
+        const toggleText = document.getElementById('toggleText');
+
+        // Función Global para el onclick
+        window.toggleMode = function (toLogin) {
+            isLogin = toLogin;
+            console.log("🔄 Cambiando modo a:", isLogin ? "Login" : "Registro");
+
+            const actionText = isLogin ? "Continuar el Viaje" : "Forjar Nueva Identidad";
+            const helperText = isLogin
+                ? '¿Aún no has sido registrado en los anales? <span class="mode-toggle cursor-pointer font-bold text-amber-500 underline" onclick="toggleMode(false)">Forjar una cuenta</span>'
+                : '¿Ya posees una identidad secreta? <span class="mode-toggle cursor-pointer font-bold text-amber-500 underline" onclick="toggleMode(true)">Iniciar Sesión</span>';
+
+            const loginLabel = document.querySelector('#inputGroupNickname label');
+            if (loginLabel) {
+                loginLabel.textContent = isLogin ? "Nombre en la Comarca" : "Apodo del Nuevo Aventurero";
+            }
+
+            tabLogin.className = isLogin
+                ? "flex-1 pb-3 text-sm font-bold uppercase tracking-widest border-b-2 border-amber-500 text-amber-500 transition-all cursor-pointer"
+                : "flex-1 pb-3 text-sm font-bold uppercase tracking-widest border-b-2 border-transparent text-slate-500 hover:text-slate-300 transition-all cursor-pointer";
+
+            tabRegister.className = !isLogin
+                ? "flex-1 pb-3 text-sm font-bold uppercase tracking-widest border-b-2 border-amber-500 text-amber-500 transition-all cursor-pointer"
+                : "flex-1 pb-3 text-sm font-bold uppercase tracking-widest border-b-2 border-transparent text-slate-500 hover:text-slate-300 transition-all cursor-pointer";
+
+            actionBtn.querySelector('span:not(#spinner)').textContent = actionText;
+            toggleText.innerHTML = helperText;
+            hideAlert();
+        };
+
+        // Check Session
+        samClient.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                showAlert('✨ Bienvenido de nuevo, portador. Redirigiendo...', 'success');
+                setTimeout(() => window.location.href = 'index.html', 1000);
+            }
+        });
+
+
+
+        tabLogin.addEventListener('click', () => toggleMode(true));
+        tabRegister.addEventListener('click', () => toggleMode(false));
+
+        function showAlert(msg, type = 'error') {
+            alertMsg.textContent = msg;
+            alertBox.classList.remove('hidden');
+            if (type === 'error') {
+                alertBox.className = "mb-6 p-4 rounded-xl border bg-red-950/20 border-red-500/30 text-red-400 flex items-start gap-3 animate-in fade-in slide-in-from-top-4 duration-300";
+                alertIcon.textContent = '⚠️';
+                loginCard.classList.add('shake');
+                setTimeout(() => loginCard.classList.remove('shake'), 500);
+            } else {
+                alertBox.className = "mb-6 p-4 rounded-xl border bg-emerald-950/20 border-emerald-500/30 text-emerald-400 flex items-start gap-3 animate-in fade-in slide-in-from-top-4 duration-300";
+                alertIcon.textContent = '✨';
+            }
+        }
+
+        function hideAlert() {
+            alertBox.classList.add('hidden');
+        }
+
+        async function handleAction() {
+            const nickname = nicknameInput.value.trim().toLowerCase();
+            const password = passwordInput.value;
+
+            if (!nickname || !password) {
+                showAlert('Completa los campos para continuar, viajero.');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAlert('La palabra de poder debe tener al menos 6 caracteres.');
+                return;
+            }
+
+            setLoading(true);
+            hideAlert();
+
+            // Convert nickname to pseudo-email
+            const email = nickname.includes('@') ? nickname : `${nickname}@comarca.com`;
+
+            try {
+                let response;
+                if (isLogin) {
+                    console.log(`🔐 Intentando login con: ${email}`);
+                    response = await samClient.auth.signInWithPassword({ email, password });
+                } else {
+                    console.log(`🛡️ Intentando registro con: ${email}`);
+                    response = await samClient.auth.signUp({ email, password });
+                }
+
+                if (response.error) {
+                    let friendlyMsg = response.error.message;
+                    if (friendlyMsg.includes('Invalid login credentials')) {
+                        friendlyMsg = 'Nombre o contraseña incorrectos. ¿Ha robado Gollum tu identidad?';
+                    } else if (friendlyMsg.includes('User already registered')) {
+                        friendlyMsg = 'Este nombre ya pertenece a otro aventurero.';
+                    } else if (friendlyMsg.includes('Email not confirmed')) {
+                        friendlyMsg = '🚫 Tu cuenta aún no está confirmada. Como tu email es ficticio, debes correr el script fix_auth_manual.sql en Supabase o desactivar "Confirm email" en los ajustes de Auth.';
+                    }
+                    showAlert(friendlyMsg);
+                } else {
+                    if (!isLogin && !response.data.session) {
+                        showAlert('✨ Identidad forjada. IMPORTANTE: Si te da error al entrar por "Email not confirmed", pide al administrador que ejecute el script de confirmación o desactive la validación de email.', 'success');
+                    } else {
+                        showAlert('✅ Éxito absoluto. Entrando en la Tierra Media...', 'success');
+                        setTimeout(() => window.location.href = 'index.html', 800);
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                showAlert('Una perturbación en la Fuerza... digo, en la Red. Inténtalo de nuevo.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function setLoading(isLoading) {
+            actionBtn.disabled = isLoading;
+            spinner.classList.toggle('hidden', !isLoading);
+        }
+
+        actionBtn.addEventListener('click', handleAction);
+        nicknameInput.addEventListener('keypress', e => (e.key === 'Enter') && passwordInput.focus());
+        passwordInput.addEventListener('keypress', e => (e.key === 'Enter') && handleAction());
+
+        document.getElementById('togglePass').addEventListener('click', function () {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            this.textContent = type === 'password' ? '👁️' : '🕶️';
+        });
+
+    </script>
+</body>
+
+</html>

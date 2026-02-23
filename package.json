@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
     "test": "jest --config jest.config.backend.js && jest --config jest.config.frontend.js",
     "test:backend": "jest --config jest.config.backend.js",
     "test:frontend": "jest --config jest.config.frontend.js"
