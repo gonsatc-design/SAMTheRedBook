@@ -1,5 +1,5 @@
-const request = require('supertest');
-const { app } = require('../server'); // Asegúrate de exportar 'app' en server.js
+﻿const request = require('supertest');
+const { app } = require('../js/backend/server'); // AsegÃºrate de exportar 'app' en server.js
 const { createClient } = require('@supabase/supabase-js');
 
 // Mock completo de Supabase
@@ -31,14 +31,14 @@ describe('GET /api/stats/personal', () => {
         expect(res.statusCode).toBe(401);
     });
 
-    test('Debe devolver stats correctamente cuando el token es válido', async () => {
-        // 1. Mockear autenticación exitosa
+    test('Debe devolver stats correctamente cuando el token es vÃ¡lido', async () => {
+        // 1. Mockear autenticaciÃ³n exitosa
         supabaseMock.auth.getUser.mockResolvedValue({
             data: { user: { id: 'test-user-id' } },
             error: null
         });
 
-        // 2. Mockear respuesta de la función RPC
+        // 2. Mockear respuesta de la funciÃ³n RPC
         const mockStats = {
             summary: {
                 total_tasks: 10,
@@ -54,7 +54,7 @@ describe('GET /api/stats/personal', () => {
             error: null
         });
 
-        // 3. Hacer la petición
+        // 3. Hacer la peticiÃ³n
         const res = await request(app)
             .get('/api/stats/personal')
             .set('Authorization', 'Bearer fake-token');
@@ -64,7 +64,7 @@ describe('GET /api/stats/personal', () => {
         expect(res.body.success).toBe(true);
         expect(res.body.stats).toEqual(mockStats);
 
-        // Verificar que se llamó a la función RPC correcta
+        // Verificar que se llamÃ³ a la funciÃ³n RPC correcta
         expect(supabaseMock.rpc).toHaveBeenCalledWith('get_weekly_stats');
     });
 
@@ -89,3 +89,4 @@ describe('GET /api/stats/personal', () => {
         expect(res.body.success).toBe(false);
     });
 });
+

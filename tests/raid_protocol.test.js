@@ -1,11 +1,11 @@
-const request = require('supertest');
-const { app } = require('../server');
+﻿const request = require('supertest');
+const { app } = require('../js/backend/server');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-describe('🛡️ RAID PROTOCOL - INTEGRATION TEST', () => {
+describe('ðŸ›¡ï¸ RAID PROTOCOL - INTEGRATION TEST', () => {
     let validToken;
     let loggedUserId;
 
@@ -16,7 +16,7 @@ describe('🛡️ RAID PROTOCOL - INTEGRATION TEST', () => {
             password: 'anillo123'
         });
 
-        if (error) throw new Error("❌ Error en Login de Test: " + error.message);
+        if (error) throw new Error("âŒ Error en Login de Test: " + error.message);
         validToken = data.session.access_token;
         loggedUserId = data.user.id;
 
@@ -30,20 +30,20 @@ describe('🛡️ RAID PROTOCOL - INTEGRATION TEST', () => {
             .single();
 
         if (selectError && selectError.code !== 'PGRST116') {
-            console.error("❌ Error al verificar perfil:", selectError.message);
+            console.error("âŒ Error al verificar perfil:", selectError.message);
         }
 
         if (!profile) {
             console.log("Creating test profile...");
             const { error: insertError } = await supabase.from('profiles').insert([{ id: loggedUserId }]);
             if (insertError) {
-                console.error("❌ Error al crear perfil de test:", insertError.message);
+                console.error("âŒ Error al crear perfil de test:", insertError.message);
                 throw insertError;
             }
         }
     });
 
-    it('Debe reducir el HP de Sauron al completar tareas simultáneamente', async () => {
+    it('Debe reducir el HP de Sauron al completar tareas simultÃ¡neamente', async () => {
         // 1. Obtener HP inicial
         const { data: initialStatus } = await supabase.rpc('get_world_status');
         const initialHP = BigInt(initialStatus.current_hp || 500000);
@@ -60,7 +60,7 @@ describe('🛡️ RAID PROTOCOL - INTEGRATION TEST', () => {
 
         if (taskError) throw taskError;
 
-        // 3. Simular finalización simultánea
+        // 3. Simular finalizaciÃ³n simultÃ¡nea
         const [task1, task2] = tasks;
 
         // Ejecutamos las peticiones en paralelo
@@ -80,29 +80,29 @@ describe('🛡️ RAID PROTOCOL - INTEGRATION TEST', () => {
             if (res.statusCode !== 200) console.log(`Response ${i + 1} Body:`, res.body);
         });
 
-        // 4. Esperar un momento para que el daño asíncrono se procese
+        // 4. Esperar un momento para que el daÃ±o asÃ­ncrono se procese
         await new Promise(resolve => setTimeout(resolve, 4000));
 
-        // 5. Verificar HP final (consulta directa para evitar inconsistencias de cálculo)
+        // 5. Verificar HP final (consulta directa para evitar inconsistencias de cÃ¡lculo)
         const { data: finalStatus } = await supabase.from('world_events').select('current_hp').eq('is_active', true).single();
         const finalHP = BigInt(finalStatus.current_hp);
         console.log(`Final HP: ${finalHP}`);
 
-        // Daño esperado: (5 * multiplier) + (5 * multiplier) = 10 * 1.0 = 10
-        // Nota: damage_multiplier en world_events es 10, pero mi función usa difficulty * classMult
-        // El damage_multiplier de world_events se usa en get_world_status para el cálculo dinámico basado en count(*)
-        // ¡OJO! Mi implementación procesarDanioGlobal usa RPC 'process_global_damage' que resta HP físico.
+        // DaÃ±o esperado: (5 * multiplier) + (5 * multiplier) = 10 * 1.0 = 10
+        // Nota: damage_multiplier en world_events es 10, pero mi funciÃ³n usa difficulty * classMult
+        // El damage_multiplier de world_events se usa en get_world_status para el cÃ¡lculo dinÃ¡mico basado en count(*)
+        // Â¡OJO! Mi implementaciÃ³n procesarDanioGlobal usa RPC 'process_global_damage' que resta HP fÃ­sico.
         // Pero get_world_status recalcula basado en el count(*) de tareas completadas.
 
-        // REVISIÓN: Mi get_world_status original usa:
+        // REVISIÃ“N: Mi get_world_status original usa:
         // calculated_hp := active_event.max_hp - (total_completed_global * active_event.damage_multiplier);
-        // Si quiero que use el HP físico restado, debo actualizar get_world_status.
+        // Si quiero que use el HP fÃ­sico restado, debo actualizar get_world_status.
 
         expect(finalHP).toBeLessThan(initialHP);
     });
 
-    it('Debe permitir sacrificar Oro para dañar al jefe', async () => {
-        // 1. Preparar Oro en el perfil (vía SQL directo para el test)
+    it('Debe permitir sacrificar Oro para daÃ±ar al jefe', async () => {
+        // 1. Preparar Oro en el perfil (vÃ­a SQL directo para el test)
         await supabase
             .from('profiles')
             .update({ gold: 1000 })
@@ -122,7 +122,7 @@ describe('🛡️ RAID PROTOCOL - INTEGRATION TEST', () => {
         expect(res.statusCode).toBe(200);
         console.log(`Sacrifice Damage Dealt: ${res.body.damage_dealt}`);
 
-        // 5. Verificar que el oro bajó
+        // 5. Verificar que el oro bajÃ³
         const { data: profile } = await supabase.from('profiles').select('gold').eq('id', loggedUserId).single();
         console.log(`Gold after sacrifice: ${profile?.gold}`);
         expect(profile.gold).toBe(500);
@@ -139,14 +139,14 @@ describe('🛡️ RAID PROTOCOL - INTEGRATION TEST', () => {
         expect(hp1 - hp2).toBeGreaterThanOrEqual(BigInt(2500));
     });
 
-    it('Debe denegar sacrificio de XP si bajaría de nivel', async () => {
+    it('Debe denegar sacrificio de XP si bajarÃ­a de nivel', async () => {
         // 1. Preparar perfil: Level 2 (1000 XP), XP total 1050.
         await supabase
             .from('profiles')
             .update({ experience: 1050, level: 2 })
             .eq('id', loggedUserId);
 
-        // 2. Intentar sacrificar 100 XP (quedaría en 950, bajando de 1000)
+        // 2. Intentar sacrificar 100 XP (quedarÃ­a en 950, bajando de 1000)
         const res = await request(app)
             .post('/api/raid/sacrifice')
             .set('Authorization', `Bearer ${validToken}`)
@@ -156,11 +156,12 @@ describe('🛡️ RAID PROTOCOL - INTEGRATION TEST', () => {
         if (res.statusCode !== 400) console.log(`XP Sacrifice Error Body:`, res.body);
 
         expect(res.statusCode).toBe(400);
-        // El RPC devuelve 'bajaría tu nivel' (con tildes)
+        // El RPC devuelve 'bajarÃ­a tu nivel' (con tildes)
         expect(res.body.error).toContain("nivel");
 
-        // 3. Verificar que la XP no cambió
+        // 3. Verificar que la XP no cambiÃ³
         const { data: profile } = await supabase.from('profiles').select('experience').eq('id', loggedUserId).single();
         expect(profile.experience).toBe(1050);
     });
 });
+

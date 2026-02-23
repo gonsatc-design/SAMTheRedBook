@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
-    "test": "jest --config jest.config.backend.js && jest --config jest.config.frontend.js",
-    "test:backend": "jest --config jest.config.backend.js",
-    "test:frontend": "jest --config jest.config.frontend.js"
+    "start": "node js/backend/server.js",
+    "dev": "node js/backend/server.js",
+    "test": "jest --config config/jest.backend.config.js && jest --config config/jest.frontend.config.js",
+    "test:backend": "jest --config config/jest.backend.config.js",
+    "test:frontend": "jest --config config/jest.frontend.config.js"
   },
   "keywords": [],
   "author": "",

@@ -1,9 +1,9 @@
-const request = require('supertest');
-const { app } = require('../server');
+﻿const request = require('supertest');
+const { app } = require('../js/backend/server');
 const { createClient } = require('@supabase/supabase-js');
 
 // Reutilizamos el mock que ya definimos en stats.test.js si fuera el mismo archivo, 
-// pero como es archivo nuevo, necesitamos definir el mock aquí también.
+// pero como es archivo nuevo, necesitamos definir el mock aquÃ­ tambiÃ©n.
 jest.mock('@supabase/supabase-js', () => {
     const mockRpc = jest.fn();
     const mockAuthGetUser = jest.fn();
@@ -58,3 +58,4 @@ describe('GET /api/stats/global', () => {
         expect(supabaseMock.rpc).toHaveBeenCalledWith('get_world_status');
     });
 });
+

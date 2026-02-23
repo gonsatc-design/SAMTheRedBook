@@ -1,39 +1,39 @@
-const request = require('supertest');
-const { app } = require('../server'); 
+﻿const request = require('supertest');
+const { app } = require('../js/backend/server'); 
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 // Cliente de Supabase para operaciones directas en DB y Auth
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-describe('🛡️ GANDALF JUDGE ENDPOINT (INTEGRATION)', () => {
+describe('ðŸ›¡ï¸ GANDALF JUDGE ENDPOINT (INTEGRATION)', () => {
     let testTask;
-    let validToken; // Aquí guardaremos la llave real
+    let validToken; // AquÃ­ guardaremos la llave real
     const TEST_USER_ID = process.env.TEST_USER_ID; 
 
     // 1. ANTES DE NADA: CONSEGUIMOS UNA LLAVE REAL (LOGIN)
     beforeAll(async () => {
-        // Usamos tus credenciales de desarrollo para obtener un token válido
-        // NOTA: Si cambias la pass de Frodo, cámbiala aquí también.
+        // Usamos tus credenciales de desarrollo para obtener un token vÃ¡lido
+        // NOTA: Si cambias la pass de Frodo, cÃ¡mbiala aquÃ­ tambiÃ©n.
         const { data, error } = await supabase.auth.signInWithPassword({
             email: 'frodo@comarca.com',
             password: 'anillo123'
         });
 
-        if (error) throw new Error("❌ Error en Login de Test: " + error.message);
+        if (error) throw new Error("âŒ Error en Login de Test: " + error.message);
         validToken = data.session.access_token;
     });
 
     // 2. ANTES DE CADA TEST: CREAMOS UNA TAREA DE PRUEBA
     beforeEach(async () => {
-        // Limpieza preventiva por si quedó basura
+        // Limpieza preventiva por si quedÃ³ basura
         await supabase.from('tasks').delete().eq('titulo_epico', 'TEST_AUTO_GANDALF');
 
         const { data, error } = await supabase
             .from('tasks')
             .insert({
                 user_id: TEST_USER_ID,
-                titulo_epico: 'TEST_AUTO_GANDALF', // Título único para identificarla
+                titulo_epico: 'TEST_AUTO_GANDALF', // TÃ­tulo Ãºnico para identificarla
                 categoria: 'estudio',
                 is_completed: false,
                 fallo_confirmado: false
@@ -45,18 +45,18 @@ describe('🛡️ GANDALF JUDGE ENDPOINT (INTEGRATION)', () => {
         testTask = data;
     });
 
-    // 3. DESPUÉS DE CADA TEST: LIMPIAMOS LA SANGRE
+    // 3. DESPUÃ‰S DE CADA TEST: LIMPIAMOS LA SANGRE
     afterEach(async () => {
         if (testTask) {
             await supabase.from('tasks').delete().eq('id', testTask.id);
         }
     });
 
-    // ⚔️ EL TEST DE FUEGO
+    // âš”ï¸ EL TEST DE FUEGO
     it('Debe marcar una tarea como fallida y activar la fecha de fallo', async () => {
         const response = await request(app)
             .post('/api/gandalf/judge')
-            .set('Authorization', `Bearer ${validToken}`) // <--- ¡AQUÍ ESTÁ LA CLAVE! Enviamos el token real
+            .set('Authorization', `Bearer ${validToken}`) // <--- Â¡AQUÃ ESTÃ LA CLAVE! Enviamos el token real
             .send({ failureIds: [testTask.id] });
 
         // Verificaciones
@@ -71,8 +71,8 @@ describe('🛡️ GANDALF JUDGE ENDPOINT (INTEGRATION)', () => {
             .single();
         
         expect(error).toBeNull();
-        expect(updatedTask.fallo_confirmado).toBe(true); // Se marcó el fallo
-        expect(updatedTask.is_completed).toBe(false);    // No está completada
+        expect(updatedTask.fallo_confirmado).toBe(true); // Se marcÃ³ el fallo
+        expect(updatedTask.is_completed).toBe(false);    // No estÃ¡ completada
         expect(updatedTask.failed_at).not.toBeNull();    // Tiene fecha de la horda
     });
 });

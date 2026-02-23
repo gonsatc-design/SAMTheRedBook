@@ -1,4 +1,4 @@
-const { calcularHorda } = require('../horda');
+﻿const { calcularHorda } = require('../js/backend/horda');
 
 describe('Algoritmo de Asedio - calcularHorda', () => {
   
@@ -11,31 +11,31 @@ describe('Algoritmo de Asedio - calcularHorda', () => {
     expect(horda).toEqual({ exploradores: 0, orcos: 0, urukhai: 0 });
   });
 
-  test('Caso 1: Tarea fallada hace 3 días debe generar 3 Exploradores, 1 Orco, 0 Uruk-Hai', () => {
-    const fechaFallo = new Date('2025-01-07T10:00:00.000Z'); // 3 días antes
+  test('Caso 1: Tarea fallada hace 3 dÃ­as debe generar 3 Exploradores, 1 Orco, 0 Uruk-Hai', () => {
+    const fechaFallo = new Date('2025-01-07T10:00:00.000Z'); // 3 dÃ­as antes
     const horda = calcularHorda(fechaFallo, fechaReferencia);
     expect(horda).toEqual({ exploradores: 3, orcos: 1, urukhai: 0 });
   });
 
-  test('Caso 2: Tarea fallada hace 6 días debe generar 6 Exploradores, 2 Orcos, 1 Uruk-Hai', () => {
-    const fechaFallo = new Date('2025-01-04T10:00:00.000Z'); // 6 días antes
+  test('Caso 2: Tarea fallada hace 6 dÃ­as debe generar 6 Exploradores, 2 Orcos, 1 Uruk-Hai', () => {
+    const fechaFallo = new Date('2025-01-04T10:00:00.000Z'); // 6 dÃ­as antes
     const horda = calcularHorda(fechaFallo, fechaReferencia);
     expect(horda).toEqual({ exploradores: 6, orcos: 2, urukhai: 1 });
   });
 
   test('Debe manejar fechas en formato ISO string', () => {
-    const fechaFallo = '2025-01-05T12:00:00.000Z'; // 5 días antes
+    const fechaFallo = '2025-01-05T12:00:00.000Z'; // 5 dÃ­as antes
     const horda = calcularHorda(fechaFallo, fechaReferencia);
     expect(horda).toEqual({ exploradores: 5, orcos: 1, urukhai: 1 });
   });
 });
 
 describe('Time Mocking - Viaje en el Tiempo', () => {
-    test('Tras 5 días de fallo, debe aparecer 1 Uruk-Hai', () => {
+    test('Tras 5 dÃ­as de fallo, debe aparecer 1 Uruk-Hai', () => {
         // 1. Arrange: Una tarea falla "hoy"
         const fechaFallo = new Date('2025-01-10T12:00:00.000Z');
 
-        // 2. Act: Viajamos 5 días al futuro
+        // 2. Act: Viajamos 5 dÃ­as al futuro
         const fechaReferenciaFutura = new Date('2025-01-15T12:00:00.000Z');
         
         // 3. Assert: Verificamos la horda en esa fecha futura
@@ -46,4 +46,5 @@ describe('Time Mocking - Viaje en el Tiempo', () => {
         expect(horda.urukhai).toBe(1);
     });
 });
+
 

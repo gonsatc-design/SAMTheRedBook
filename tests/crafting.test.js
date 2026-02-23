@@ -1,11 +1,11 @@
-const request = require('supertest');
-const { app } = require('../server');
+﻿const request = require('supertest');
+const { app } = require('../js/backend/server');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-describe('🛡️ DURIN\'S ANVIL - CRAFTING TEST (INTEGRATION)', () => {
+describe('ðŸ›¡ï¸ DURIN\'S ANVIL - CRAFTING TEST (INTEGRATION)', () => {
     let validToken;
     const TEST_USER_ID = process.env.TEST_USER_ID;
 
@@ -15,13 +15,13 @@ describe('🛡️ DURIN\'S ANVIL - CRAFTING TEST (INTEGRATION)', () => {
             password: 'anillo123'
         });
 
-        if (error) throw new Error("❌ Error en Login de Test: " + error.message);
+        if (error) throw new Error("âŒ Error en Login de Test: " + error.message);
         validToken = data.session.access_token;
     });
 
     it('Debe devolver error 400 cuando los recursos son insuficientes', async () => {
         // Asumiendo que Frodo no tiene 5 Hierro y 2 Cuero al inicio del test
-        // Primero nos aseguramos de limpiar su inventario de esos items específicos para el test
+        // Primero nos aseguramos de limpiar su inventario de esos items especÃ­ficos para el test
         await supabase
             .from('inventory')
             .delete()
@@ -34,7 +34,7 @@ describe('🛡️ DURIN\'S ANVIL - CRAFTING TEST (INTEGRATION)', () => {
             .send({ recetaNombre: 'Amuleto de Enfoque' });
 
         if (response.statusCode !== 400) {
-            console.log("❌ RESPONSE ERROR:", response.body);
+            console.log("âŒ RESPONSE ERROR:", response.body);
         }
 
         expect(response.statusCode).toBe(400);
@@ -52,3 +52,4 @@ describe('🛡️ DURIN\'S ANVIL - CRAFTING TEST (INTEGRATION)', () => {
         expect(response.body.error).toContain("La receta no existe");
     });
 });
+
