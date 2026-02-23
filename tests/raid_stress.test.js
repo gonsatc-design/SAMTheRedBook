@@ -1,5 +1,5 @@
-const request = require('supertest');
-const { app } = require('../server');
+﻿const request = require('supertest');
+const { app } = require('../js/backend/server');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
@@ -16,7 +16,7 @@ describe('Raid Protocol - Stress Test (Block 4)', () => {
             password: 'anillo123'
         });
 
-        if (signError) throw new Error("❌ Error en Login: " + signError.message);
+        if (signError) throw new Error("âŒ Error en Login: " + signError.message);
         frodoToken = signData.session.access_token;
         frodoId = signData.user.id;
 
@@ -47,10 +47,10 @@ describe('Raid Protocol - Stress Test (Block 4)', () => {
         
         const initialHP = parseInt(initialData[0].current_hp);
 
-        console.log(`🚀 Iniciando oleada de ${NUM_REQUESTS} ataques...`);
-        console.log(`📊 HP Inicial: ${initialHP}`);
-        console.log(`💰 Por sacrificio: ${SACRIFICE_AMOUNT} oro × ${DAMAGE_PER_GOLD} daño = ${SACRIFICE_AMOUNT * DAMAGE_PER_GOLD} HP`);
-        console.log(`💥 Daño esperado TOTAL: ${EXPECTED_TOTAL_DAMAGE} HP`);
+        console.log(`ðŸš€ Iniciando oleada de ${NUM_REQUESTS} ataques...`);
+        console.log(`ðŸ“Š HP Inicial: ${initialHP}`);
+        console.log(`ðŸ’° Por sacrificio: ${SACRIFICE_AMOUNT} oro Ã— ${DAMAGE_PER_GOLD} daÃ±o = ${SACRIFICE_AMOUNT * DAMAGE_PER_GOLD} HP`);
+        console.log(`ðŸ’¥ DaÃ±o esperado TOTAL: ${EXPECTED_TOTAL_DAMAGE} HP`);
         
         const start = Date.now();
 
@@ -61,7 +61,7 @@ describe('Raid Protocol - Stress Test (Block 4)', () => {
                 .send({ type: 'gold', amount: SACRIFICE_AMOUNT })
                 .then(res => {
                     if (!res.body.success) {
-                        console.warn(`❌ Req #${idx + 1} falló:`, res.body.error);
+                        console.warn(`âŒ Req #${idx + 1} fallÃ³:`, res.body.error);
                     }
                     return res;
                 })
@@ -71,22 +71,22 @@ describe('Raid Protocol - Stress Test (Block 4)', () => {
         const end = Date.now();
         const duration = end - start;
 
-        console.log(`⏱️ Oleada completada en ${duration}ms`);
+        console.log(`â±ï¸ Oleada completada en ${duration}ms`);
 
         // Verificar resultados
         const successCount = responses.filter(r => r.body && r.body.success).length;
         const errorCount = responses.filter(r => !r.body || !r.body.success).length;
 
         if (errorCount > 0) {
-            console.error("❌ Muestra de Error:", responses.find(r => !r.body || !r.body.success).body);
+            console.error("âŒ Muestra de Error:", responses.find(r => !r.body || !r.body.success).body);
         }
 
-        console.log(`✅ Éxitos: ${successCount}/${NUM_REQUESTS}, ❌ Errores: ${errorCount}`);
+        console.log(`âœ… Ã‰xitos: ${successCount}/${NUM_REQUESTS}, âŒ Errores: ${errorCount}`);
 
         // Esperar un poco para que la BD procese
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Obtener vida final (DIRECTO DE LA TABLA, no RPC que podría cachear)
+        // Obtener vida final (DIRECTO DE LA TABLA, no RPC que podrÃ­a cachear)
         const { data: finalData } = await supabase
             .from('world_events')
             .select('current_hp')
@@ -96,13 +96,13 @@ describe('Raid Protocol - Stress Test (Block 4)', () => {
         const finalHP = parseInt(finalData[0].current_hp);
         const actualDamage = initialHP - finalHP;
 
-        console.log(`📉 HP Final: ${finalHP}`);
-        console.log(`💥 Daño Real: ${actualDamage} HP`);
-        console.log(`📊 Estado esperado: ${initialHP} - ${EXPECTED_TOTAL_DAMAGE} = ${initialHP - EXPECTED_TOTAL_DAMAGE}`);
+        console.log(`ðŸ“‰ HP Final: ${finalHP}`);
+        console.log(`ðŸ’¥ DaÃ±o Real: ${actualDamage} HP`);
+        console.log(`ðŸ“Š Estado esperado: ${initialHP} - ${EXPECTED_TOTAL_DAMAGE} = ${initialHP - EXPECTED_TOTAL_DAMAGE}`);
 
         // Mostrar discrepancia si la hay
         if (actualDamage !== EXPECTED_TOTAL_DAMAGE) {
-            console.warn(`⚠️ DISCREPANCIA: Esperaba ${EXPECTED_TOTAL_DAMAGE}, obtuve ${actualDamage}`);
+            console.warn(`âš ï¸ DISCREPANCIA: Esperaba ${EXPECTED_TOTAL_DAMAGE}, obtuve ${actualDamage}`);
             console.warn(`   Diferencia: ${Math.abs(actualDamage - EXPECTED_TOTAL_DAMAGE)} HP`);
         }
 
@@ -114,7 +114,7 @@ describe('Raid Protocol - Stress Test (Block 4)', () => {
             .limit(10);
         
         if (logs && logs.length > 0) {
-            console.log(`� Últimos 10 logs (${logs.length} registrados):`);
+            console.log(`ï¿½ Ãšltimos 10 logs (${logs.length} registrados):`);
             let totalLogDamage = 0;
             logs.forEach((log, i) => {
                 totalLogDamage += log.damage;
@@ -122,7 +122,7 @@ describe('Raid Protocol - Stress Test (Block 4)', () => {
             });
             console.log(`   Total desde logs: ${totalLogDamage}`);
         } else {
-            console.warn(`⚠️ No se encontraron logs en raid_logs`);
+            console.warn(`âš ï¸ No se encontraron logs en raid_logs`);
         }
 
         expect(duration).toBeLessThan(5000); // Tolerancia de 5s para el entorno de test
@@ -130,3 +130,4 @@ describe('Raid Protocol - Stress Test (Block 4)', () => {
         expect(actualDamage).toBe(EXPECTED_TOTAL_DAMAGE);
     });
 });
+
