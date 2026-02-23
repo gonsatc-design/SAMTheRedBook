@@ -7,15 +7,12 @@
  * - Acelerar carga subsequent
  */
 
-const CACHE_NAME = 'sam-v3';
+const CACHE_NAME = 'sam-v4';
 const URLS_TO_CACHE = [
     './',
     './index.html',
     './login.html',
-    './manifest.json',
-    'https://cdn.tailwindcss.com',
-    'https://unpkg.com/@supabase/supabase-js@2',
-    'https://cdn.jsdelivr.net/npm/chart.js'
+    './manifest.json'
 ];
 
 // 1. INSTALAR: Cachear archivos críticos
