@@ -288,7 +288,12 @@ app.post('/api/briefing', authMiddleware, async (req, res) => {
     }
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`📜 El Libro Rojo se ha abierto en el puerto ${PORT}`);
+    console.log(`   -> MODO: ${process.env.NODE_ENV === 'production' ? 'PRODUCCIÓN (Cloud)' : 'DESARROLLO (Local)'}`);
+});
 
 
 // --- RUTA PARA LEER EL LIBRO (Obtener Misiones) ---
@@ -345,7 +350,6 @@ app.get('/api/tasks', authMiddleware, async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
-
 
 
 
@@ -1449,24 +1453,11 @@ async function checkAchievements(userId) {
 }
 
 // ---------------------------------------------------------
-// 🚀 ARRANQUE BLINDADO
+// 🚀 ARRANQUE ESTÁNDAR PARA PRODUCCIÓN
 // ---------------------------------------------------------
-if (require.main === module) {
-    const server = app.listen(PORT, () => {
-        console.log(`\n🚀 S.A.M. OPERATIVO Y VIGILANDO EN PUERTO ${PORT}`);
-        console.log("📝 Esperando órdenes... (Presiona Ctrl + C para detener)\n");
-    });
-
-    // 🚨 DETECTAR ERRORES DE PUERTO (EADDRINUSE)
-    server.on('error', (e) => {
-        if (e.code === 'EADDRINUSE') {
-            console.error(`\n❌ ERROR CRÍTICO: El puerto ${PORT} está ocupado.`);
-            console.error("💡 SOLUCIÓN: Ejecuta 'taskkill /F /IM node.exe' en la terminal para matar procesos viejos.\n");
-        } else {
-            console.error("❌ ERROR DEL SERVIDOR:", e);
-        }
-        process.exit(1);
-    });
-}
+app.listen(PORT, () => {
+    console.log(`\n🚀 S.A.M. OPERATIVO Y VIGILANDO EN PUERTO ${PORT}`);
+    console.log("📝 Esperando órdenes... (Presiona Ctrl + C para detener)\n");
+});
 
 module.exports = { app, authMiddleware };
