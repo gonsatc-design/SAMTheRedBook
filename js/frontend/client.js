@@ -9,7 +9,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // En producción, DEBE ser la URL que te dio Render.
 const API_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
     ? 'http://localhost:3000'
-    : 'https://samtheredbook-backend.onrender.com'; // <-- URL de Render
+    : 'https://samtheredbook.onrender.com'; // <-- URL de Render
 
 let userToken = localStorage.getItem('userToken');
 
