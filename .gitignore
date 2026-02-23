@@ -1,4 +1,4 @@
-# --- DEPENDENCIAS (LO MÁS IMPORTANTE) ---
+﻿# --- DEPENDENCIAS ---
 node_modules/
 /node_modules
 
@@ -12,17 +12,15 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# --- SISTEMA OPERATIVO (BASURA) ---
+# --- SISTEMA / IDE ---
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
 
-# --- ARCHIVOS DE BUILD (FUTURO) ---
+# --- BUILD / REPORTS ---
 dist/
 build/
-
-# --- TEST/REPORTS ---
 coverage/
 .nyc_output/
 junit.xml
