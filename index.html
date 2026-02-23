@@ -8,42 +8,41 @@
 
     <!-- SEO & Meta Tags -->
     <meta name="description"
-        content="Un sistema de gestiÃ³n de gestas Ã©picas. Vence a la Sombra completando misiones, desbloquea logros y domina el arte de la productividad.">
+        content="Un sistema de gestión de gestas épicas. Vence a la Sombra completando misiones, desbloquea logros y domina el arte de la productividad.">
     <meta name="author" content="S.A.M. - El Libro Rojo">
-    <meta name="keywords" content="productividad, gamificaciÃ³n, IA, gestas, misiones, RPG">
+    <meta name="keywords" content="productividad, gamificación, IA, gestas, misiones, RPG">
 
     <!-- Open Graph (Facebook, Discord, WhatsApp) -->
-    <meta property="og:title" content="S.A.M. - Â¿PodrÃ¡s vencer a la Sombra?">
+    <meta property="og:title" content="S.A.M. - ¿Podrás vencer a la Sombra?">
     <meta property="og:description"
-        content="Un viaje Ã©pico hacia la productividad. Completa misiones, desbloquea logros y conviÃ©rtete en leyenda.">
+        content="Un viaje épico hacia la productividad. Completa misiones, desbloquea logros y conviértete en leyenda.">
     <meta property="og:image"
-        content="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 630%22><rect fill=%22%230f172a%22 width=%221200%22 height=%22630%22/><text x=%22600%22 y=%22300%22 font-size=%22120%22 fill=%22%23fbbf24%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22>ðŸ“œ S.A.M.</text><text x=%22600%22 y=%22450%22 font-size=%2240%22 fill=%22%23e2e8f0%22 text-anchor=%22middle%22>El Libro Rojo</text></svg>">
+        content="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 630%22><rect fill=%22%230f172a%22 width=%221200%22 height=%22630%22/><text x=%22600%22 y=%22300%22 font-size=%22120%22 fill=%22%23fbbf24%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22>📜 S.A.M.</text><text x=%22600%22 y=%22450%22 font-size=%2240%22 fill=%22%23e2e8f0%22 text-anchor=%22middle%22>El Libro Rojo</text></svg>">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="es_ES">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="S.A.M. - Â¿PodrÃ¡s vencer a la Sombra?">
+    <meta name="twitter:title" content="S.A.M. - ¿Podrás vencer a la Sombra?">
     <meta name="twitter:description"
-        content="Completa misiones Ã©picas y vence a la Sombra. GamificaciÃ³n + IA para la productividad.">
+        content="Completa misiones épicas y vence a la Sombra. Gamificación + IA para la productividad.">
 
     <!-- Safety Globals -->
     <script>
-        window.logoutUser = window.logoutUser || function (b) { console.log("â³ Esperando a que el Libro cargue sus secretos..."); };
-        window.toggleMode = window.toggleMode || function (m) { console.log("â³ Preparando la Forja..."); };
+        window.logoutUser = window.logoutUser || function (b) { console.log("⏳ Esperando a que el Libro cargue sus secretos..."); };
+        window.toggleMode = window.toggleMode || function (m) { console.log("⏳ Preparando la Forja..."); };
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="index.css">
 
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>ðŸ“œ</text></svg>">
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📜</text></svg>">
     <link rel="apple-touch-icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>ðŸ“œ</text></svg>">
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📜</text></svg>">
     <meta name="theme-color" content="#fbbf24">
 
     <!-- Estilos -->
@@ -58,9 +57,9 @@
     <!-- Splash Screen -->
     <div id="splashScreen"
         class="fixed inset-0 z-[1000] bg-slate-950 flex flex-col items-center justify-center transition-opacity duration-700">
-        <div class="text-6xl mb-4 animate-bounce">ðŸ“œ</div>
+        <div class="text-6xl mb-4 animate-bounce">📜</div>
         <h1 class="text-2xl font-bold text-amber-500 tracking-[0.25em] animate-pulse">S.A.M. EL LIBRO ROJO</h1>
-        <p class="text-slate-500 text-xs mt-4 italic">"Un viaje Ã©pico hacia la productividad..."</p>
+        <p class="text-slate-500 text-xs mt-4 italic">"Un viaje épico hacia la productividad..."</p>
     </div>
 
 
@@ -73,19 +72,19 @@
                 <h1 class="text-2xl font-bold text-amber-400 tracking-[0.2em] drop-shadow-lg">S.A.M. EL LIBRO ROJO</h1>
             </div>
             <div class="flex items-center gap-3">
-                <!-- BotÃ³n TFM Showcase -->
+                <!-- Botón TFM Showcase -->
                 <a href="tfm-showcase.html"
                     class="h-8 px-3 rounded-full bg-slate-900/40 border border-amber-700/50 flex items-center justify-center text-amber-300 hover:bg-slate-800 transition-colors text-[11px] font-bold tracking-wider"
-                    title="Ver presentaciÃ³n visual del TFM">
+                    title="Ver presentación visual del TFM">
                     TFM
                 </a>
-                <!-- BotÃ³n de GuÃ­a -->
+                <!-- Botón de Guía -->
                 <button onclick="showGuide()"
                     class="w-8 h-8 rounded-full bg-amber-900/30 border border-amber-600/50 flex items-center justify-center text-amber-500 hover:bg-amber-800 transition-colors"
                     title="Manual de Supervivencia">
-                    <span>ðŸ“–</span>
+                    <span>📖</span>
                 </button>
-                <!-- El Ojo del PalantÃ­r -->
+                <!-- El Ojo del Palantír -->
                 <div id="palantirContainer" class="relative palantir-container mr-2">
                     <div id="palantirOrb"
                         class="w-8 h-8 rounded-full border-2 border-white/20 flex items-center justify-center cursor-pointer bg-blue-500 palantir-orb"
@@ -98,7 +97,7 @@
                         <p id="palantirSugerencia" class="italic"></p>
                     </div>
                 </div>
-                <!-- SIMPLIFICADO: Solo PalantÃ­r, sin datos de usuario -->
+                <!-- SIMPLIFICADO: Solo Palantír, sin datos de usuario -->
             </div>
         </header>
 
@@ -112,7 +111,7 @@
                 <p class="text-center text-sm mb-6">"Un mago nunca llega tarde. Ni pronto. Llega
                     precisamente cuando se lo propone. Y hoy me propongo resolver esto."</p>
                 <div id="gandalfTaskList" class="flex-1 overflow-y-auto space-y-4 pr-2">
-                    <!-- Las tareas pendientes se inyectarÃ¡n aquÃ­ -->
+                    <!-- Las tareas pendientes se inyectarán aquí -->
                 </div>
                 <button id="sellarJuicioBtn"
                     class="w-full mt-6 bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold py-3 rounded-lg shadow-lg">Sellar
@@ -120,39 +119,39 @@
             </div>
         </div>
 
-        <!-- MODAL DE SELECCIÃ“N DE RAZA (BLOQUE 0) -->
+        <!-- MODAL DE SELECCIÓN DE RAZA (BLOQUE 0) -->
         <div id="raceSelectionModal"
             class="hidden absolute inset-0 z-[100] bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center">
-            <h2 id="raceModalTitle" class="text-2xl font-bold text-amber-500 mb-2">Â¿ERES EL PORTADOR DEL ANILLO?</h2>
-            <p id="raceModalSubtitle" class="text-xs text-slate-400 mb-8 italic">Solo Sam (S.A.M.) te acompaÃ±a y registrarÃ¡ tus gestas. En
-                tus manos estÃ¡ el destino.</p>
+            <h2 id="raceModalTitle" class="text-2xl font-bold text-amber-500 mb-2">¿ERES EL PORTADOR DEL ANILLO?</h2>
+            <p id="raceModalSubtitle" class="text-xs text-slate-400 mb-8 italic">Solo Sam (S.A.M.) te acompaña y registrará tus gestas. En
+                tus manos está el destino.</p>
 
             <div class="grid grid-cols-2 gap-4 w-full max-w-md">
                 <button
                     class="race-opt p-4 glass-panel rounded-lg border border-slate-700 hover:border-amber-500 transition-all flex flex-col items-center group"
                     data-race="Humano">
-                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">ðŸ—¡ï¸</span>
+                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">🗡️</span>
                     <span class="font-bold text-amber-100">HUMANO</span>
                     <span class="text-[9px] text-slate-500 mt-1">Senda del Rey</span>
                 </button>
                 <button
                     class="race-opt p-4 glass-panel rounded-lg border border-slate-700 hover:border-amber-500 transition-all flex flex-col items-center group"
                     data-race="Elfo">
-                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">ðŸ¹</span>
+                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">🏹</span>
                     <span class="font-bold text-amber-100">ELFO</span>
                     <span class="text-[9px] text-slate-500 mt-1">Senda Inmortal</span>
                 </button>
                 <button
                     class="race-opt p-4 glass-panel rounded-lg border border-slate-700 hover:border-amber-500 transition-all flex flex-col items-center group"
                     data-race="Enano">
-                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">âš’ï¸</span>
+                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">⚒️</span>
                     <span class="font-bold text-amber-100">ENANO</span>
                     <span class="text-[9px] text-slate-500 mt-1">Senda de Piedra</span>
                 </button>
                 <button
                     class="race-opt p-4 glass-panel rounded-lg border border-slate-700 hover:border-amber-500 transition-all flex flex-col items-center group"
                     data-race="Hobbit">
-                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">ðŸ„</span>
+                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform">🍄</span>
                     <span class="font-bold text-amber-100">HOBBIT</span>
                     <span class="text-[9px] text-slate-500 mt-1">Senda del Hogar</span>
                 </button>
@@ -165,7 +164,7 @@
         <!-- BARRA DE PROGRESO DEL VIAJE (HUD) -->
         <div id="sauronHPContainer"
             class="px-4 py-3 bg-black/60 border-b border-red-900/50 hidden relative overflow-hidden">
-            <!-- PartÃ­culas de fuego se inyectarÃ¡n aquÃ­ -->
+            <!-- Partículas de fuego se inyectarán aquí -->
             <div id="fireContainer" class="absolute inset-0 pointer-events-none"></div>
 
             <div class="flex items-center gap-4 mb-2 relative z-10">
@@ -185,7 +184,7 @@
                             <div id="journeyProgressMarker"
                                 class="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/2 flex items-center gap-1 text-[10px] leading-none pointer-events-none z-20 bg-black/65 px-1.5 py-0.5 rounded-full border border-amber-700/50">
                                 <span id="journeyRaceIcon" title="Raza del Portador">&#x1F464;</span>
-                                <span id="journeyRingIcon" title="Anillo Ãšnico">&#x1F48D;</span>
+                                <span id="journeyRingIcon" title="Anillo Único">&#x1F48D;</span>
                             </div>
                         </div>
                     </div>
@@ -207,7 +206,7 @@
         <main id="warRoomContainer"
             class="hidden flex-1 p-4 overflow-y-auto custom-scrollbar vintage-grid war-room-panel relative">
             <h2 class="text-center text-amber-600 font-bold mb-4 tracking-[0.2em] border-b border-amber-900/30 pb-2">
-                MAPA TÃCTICO</h2>
+                MAPA TÁCTICO</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <!-- HUMANO -->
@@ -248,11 +247,11 @@
             </div>
             <div class="mt-3 rounded border border-slate-700/50 bg-black/20 p-3">
                 <p class="text-[11px] text-slate-300 leading-relaxed">
-                    AquÃ­ ves la guerra semanal por razas. Cada grÃ¡fica muestra de lunes a domingo
+                    Aquí ves la guerra semanal por razas. Cada gráfica muestra de lunes a domingo
                     las gestas cumplidas frente a las fallidas para Humano, Elfo, Enano y Hobbit.
                 </p>
                 <p class="text-[10px] text-slate-400 mt-2">
-                    Reinicio semanal automÃ¡tico: domingo a las 23:59.
+                    Reinicio semanal automático: domingo a las 23:59.
                 </p>
             </div>
         </main>
@@ -262,10 +261,10 @@
             <h2 class="text-center text-amber-600 font-bold mb-4 tracking-[0.2em] border-b border-amber-900/30 pb-2">LA
                 MOCHILA</h2>
             <div id="inventoryGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                <!-- Los items se inyectarÃ¡n aquÃ­ -->
+                <!-- Los items se inyectarán aquí -->
             </div>
             <div id="emptyInventory" class="hidden text-center mt-20 text-slate-600 italic">
-                La mochila estÃ¡ vacÃ­a... por ahora.
+                La mochila está vacía... por ahora.
             </div>
         </main>
 
@@ -275,49 +274,49 @@
                 YUNQUE DE DURIN</h2>
             <div class="bg-black/40 p-3 rounded border border-amber-900/30 mb-6 text-center">
                 <p class="text-[10px] text-amber-200/50 italic">"Solo aquellos con materiales raros y paciencia
-                    de enano forjarÃ¡n el destino."</p>
+                    de enano forjarán el destino."</p>
             </div>
 
             <div id="recipesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-2">
-                <!-- Las recetas se cargarÃ¡n dinÃ¡micamente desde JS -->
+                <!-- Las recetas se cargarán dinámicamente desde JS -->
             </div>
         </main>
 
-        <!-- SECCIÃ“N DE LOGROS (NUEVA) -->
+        <!-- SECCIÓN DE LOGROS (NUEVA) -->
         <main id="achievementsTab" class="hidden flex-1 overflow-hidden flex flex-col bg-slate-950/20">
             <div class="p-6 flex-1 overflow-y-auto custom-scrollbar">
                 <div class="flex items-center justify-between mb-6 border-b border-amber-900/40 pb-4">
                     <div>
-                        <h2 class="text-2xl font-bold text-amber-500 tracking-tighter">ðŸ›ï¸ LOGROS</h2>
+                        <h2 class="text-2xl font-bold text-amber-500 tracking-tighter">🏆 LOGROS</h2>
                     </div>
                 </div>
 
                 <div id="achievementsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <!-- Los logros se inyectarÃ¡n aquÃ­ -->
+                    <!-- Los logros se inyectarán aquí -->
                 </div>
             </div>
         </main>
 
-        <!-- MODAL DE DETALLE: PERGAMINO TÃ‰CNICO -->
+        <!-- MODAL DE DETALLE: PERGAMINO TÉCNICO -->
         <div id="itemDetailModal"
             class="hidden absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
             <div class="gandalf-scroll w-full max-w-sm rounded-lg border-2 border-amber-800 p-6 relative">
                 <button id="closeItemDetail" class="absolute top-2 right-4 text-2xl text-amber-900">&times;</button>
                 <div class="flex flex-col items-center text-center">
-                    <div id="itemDetailIcon" class="text-5xl mb-4">ðŸ“¦</div>
+                    <div id="itemDetailIcon" class="text-5xl mb-4">📦</div>
                     <h3 id="itemDetailName" class="text-2xl font-bold border-b border-amber-900/30 pb-2 w-full">Nombre
                         del Item</h3>
                     <p id="itemDetailRarity" class="text-xs uppercase tracking-widest my-2 font-bold text-amber-900">
                         Rareza</p>
                     <div
                         class="bg-amber-900/10 p-4 rounded border border-amber-900/20 italic text-sm mt-2 text-justify">
-                        <p id="itemDetailDescription">DescripciÃ³n tÃ©cnica del material...</p>
+                        <p id="itemDetailDescription">Descripción técnica del material...</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- MODAL DE GUÃA: MANUAL DE SAM (NUEVO) -->
+        <!-- MODAL DE GUÍA: MANUAL DE SAM (NUEVO) -->
         <div id="guideModal"
             class="hidden absolute inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-md p-6">
             <div
@@ -330,77 +329,77 @@
 
                 <div class="space-y-6 text-sm text-slate-200 leading-relaxed">
                     <section class="rounded border border-amber-700/30 bg-slate-900/70 p-3">
-                        <h3 class="font-bold uppercase text-xs tracking-widest mb-2 text-amber-300">&#x1F48D; TU MISIÃ“N</h3>
-                        <p>Frodo enfermÃ³ de gravedad tras la herida de la daga de Morgul y no se recupera a tiempo.
+                        <h3 class="font-bold uppercase text-xs tracking-widest mb-2 text-amber-300">&#x1F48D; TU MISIÓN</h3>
+                        <p>Frodo enfermó de gravedad tras la herida de la daga de Morgul y no se recupera a tiempo.
                             En el Concilio de Elrond decides alzarte como voluntario, y ahora eres el Portador del
-                            Anillo. Solo S.A.M. (<strong>Social Achievement Manager</strong>) te acompaÃ±a y registrarÃ¡ cada gesta en el
+                            Anillo. Solo S.A.M. (<strong>Social Achievement Manager</strong>) te acompaña y registrará cada gesta en el
                             Libro Rojo para la eternidad.
-                            En tus manos estÃ¡ el destino.</p>
+                            En tus manos está el destino.</p>
                     </section>
                     <section>
                         <h3 class="font-bold uppercase text-xs tracking-widest mb-2 border-b border-slate-700">&#x2694;&#xFE0F; EL
                             CAMINO</h3>
-                        <p>Anota tus tareas en el diario. S.A.M. las traducirÃ¡ a gestas Ã©picas.
-                            Cada Ã©xito te acerca al Monte del Destino para destruir el Anillo y acabar con Sauron y
-                            las fuerzas de la oscuridad. AdemÃ¡s, obtendrÃ¡s materiales y oro.</p>
+                        <p>Anota tus tareas en el diario. S.A.M. las traducirá a gestas épicas.
+                            Cada éxito te acerca al Monte del Destino para destruir el Anillo y acabar con Sauron y
+                            las fuerzas de la oscuridad. Además, obtendrás materiales y oro.</p>
                     </section>
 
                     <section>
                         <h3 class="font-bold uppercase text-xs tracking-widest mb-2 border-b border-slate-700">&#x1F480; LA
                             SOMBRA</h3>
-                        <p>Si dejas una tarea para maÃ±ana, la horda empezarÃ¡ a crecer. Primero exploradores, luego
-                            orcos... Â¡no dejes que las fuerzas de la oscuridad invadan la Tierra Media!</p>
-                        <p class="mt-2">AdemÃ¡s, la interfaz se oscurece por niveles cuando acumulas fallos. Cuantos
-                            mÃ¡s dÃ­as arrastres tareas sin resolver, mÃ¡s sombrÃ­o se verÃ¡ el entorno.</p>
+                        <p>Si dejas una tarea para mañana, la horda empezará a crecer. Primero exploradores, luego
+                            orcos... ¡no dejes que las fuerzas de la oscuridad invadan la Tierra Media!</p>
+                        <p class="mt-2">Además, la interfaz se oscurece por niveles cuando acumulas fallos. Cuantos
+                            más días arrastres tareas sin resolver, más sombrío se verá el entorno.</p>
                     </section>
 
                     <section>
-                        <h3 class="font-bold uppercase text-xs tracking-widest mb-2 border-b border-slate-700">âš’ï¸ LA
+                        <h3 class="font-bold uppercase text-xs tracking-widest mb-2 border-b border-slate-700">⚒️ LA
                             FORJA</h3>
                         <p>Los materiales que recojas (Hierro, Cuero, Mithril) se pueden usar en el <strong>Yunque de
-                                Durin</strong> para crear artefactos que te dan bonos permanentes de XP o protecciÃ³n.
+                                Durin</strong> para crear artefactos que te dan bonos permanentes de XP o protección.
                         </p>
                     </section>
 
                     <section>
                         <h3 class="font-bold uppercase text-xs tracking-widest mb-2 border-b border-slate-700">&#x2694;&#xFE0F; EL
-                            PALANTÃR</h3>
-                        <p>El PalantÃ­r no es un adorno: es una IA predictiva con memoria de tus patrones.
-                            Aprende cÃ³mo actÃºas, anticipa dÃ³nde puedes caer y te lanza advertencias antes de que la
+                            PALANTÍR</h3>
+                        <p>El Palantír no es un adorno: es una IA predictiva con memoria de tus patrones.
+                            Aprende cómo actúas, anticipa dónde puedes caer y te lanza advertencias antes de que la
                             Sombra gane terreno.</p>
-                        <p class="mt-3">Dicho fÃ¡cil: te avisa antes del tropiezo para que llegues preparado, no a
-                            Ãºltima hora.</p>
+                        <p class="mt-3">Dicho fácil: te avisa antes del tropiezo para que llegues preparado, no a
+                            última hora.</p>
                     </section>
 
                     <section>
                         <h3 class="font-bold uppercase text-xs tracking-widest mb-2 border-b border-slate-700">MAPA
-                            TÃCTICO</h3>
-                        <p>Las grÃ¡ficas por raza cubren la semana en curso (lunes a domingo). El recuento se reinicia
+                            TÁCTICO</h3>
+                        <p>Las gráficas por raza cubren la semana en curso (lunes a domingo). El recuento se reinicia
                             cada domingo a las 23:59.</p>
                     </section>
 
                     <section>
-                        <h3 class="font-bold uppercase text-xs tracking-widest mb-2 border-b border-slate-700">ðŸ“ˆ
-                            EVOLUCIÃ“N DE CLASE</h3>
-                        <p class="text-xs italic opacity-80 mb-4">Niveles de evoluciÃ³n por raza (hitos):
+                        <h3 class="font-bold uppercase text-xs tracking-widest mb-2 border-b border-slate-700">📈
+                            EVOLUCIÓN DE CLASE</h3>
+                        <p class="text-xs italic opacity-80 mb-4">Niveles de evolución por raza (hitos):
                             1 -> 8 -> 18 -> 25 -> 42 -> 60 -> 75 -> 99</p>
                         <ul class="text-xs space-y-2 list-none p-3 rounded border border-slate-700 bg-slate-950/80 font-bold text-slate-100">
-                            <li><strong class="text-amber-300">Humano:</strong> Granjero â†’ Aventurero â†’ Montaraz â†’
-                                Caballero â†’ PaladÃ­n â†’ Rey</li>
-                            <li><strong class="text-emerald-300">Elfo:</strong> Novicio de LÃ³rien â†’ Explorador del
-                                Bosque â†’ GuardiÃ¡n del Sendero â†’ Arquero Maestro â†’ SeÃ±or de los Caballos â†’ Alto Consejero
-                                â†’ Soberano Estelar â†’ SeÃ±or de Rivendel</li>
-                            <li><strong class="text-orange-300">Enano:</strong> Minero de Moria â†’ Picapedrero â†’
-                                Herrero de Erebor â†’ GuardiÃ¡n del Tesoro â†’ SeÃ±or del Yunque â†’ Gran Escudo de Hierro â†’ Rey
-                                bajo la MontaÃ±a â†’ Linaje de Durin</li>
-                            <li><strong class="text-yellow-300">Hobbit:</strong> Habitante del Agujero â†’ Cocinero de
-                                BolsÃ³n â†’ Buscador de Setas â†’ Aventurero Local â†’ HÃ©roe de la Comarca â†’ Portador de la
-                                Esperanza â†’ Alcalde de Cavada Grande â†’ Thain de la Comarca</li>
+                            <li><strong class="text-amber-300">Humano:</strong> Granjero → Aventurero → Montaraz →
+                                Caballero → Paladín → Rey</li>
+                            <li><strong class="text-emerald-300">Elfo:</strong> Novicio de Lórien → Explorador del
+                                Bosque → Guardián del Sendero → Arquero Maestro → Señor de los Caballos → Alto Consejero
+                                → Soberano Estelar → Señor de Rivendel</li>
+                            <li><strong class="text-orange-300">Enano:</strong> Minero de Moria → Picapedrero →
+                                Herrero de Erebor → Guardián del Tesoro → Señor del Yunque → Gran Escudo de Hierro → Rey
+                                bajo la Montaña → Linaje de Durin</li>
+                            <li><strong class="text-yellow-300">Hobbit:</strong> Habitante del Agujero → Cocinero de
+                                Bolsón → Buscador de Setas → Aventurero Local → Héroe de la Comarca → Portador de la
+                                Esperanza → Alcalde de Cavada Grande → Thain de la Comarca</li>
                         </ul>
                     </section>
                 </div>
 
-                <div class="mt-8 text-center text-[10px] italic opacity-60">"Incluso la persona mÃ¡s pequeÃ±a puede
+                <div class="mt-8 text-center text-[10px] italic opacity-60">"Incluso la persona más pequeña puede
                     cambiar el curso del futuro."</div>
             </div>
         </div>
@@ -415,7 +414,7 @@
                     <div class="flex items-center gap-6">
                         <div
                             class="w-32 h-32 rounded-full bg-gradient-to-br from-amber-900 to-slate-900 border-4 border-amber-500 flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.4)]">
-                            <span class="text-6xl" id="profileRaceIcon">ðŸ‘¤</span>
+                            <span class="text-6xl" id="profileRaceIcon">👤</span>
                         </div>
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-2">
@@ -423,7 +422,7 @@
                                 <button id="editNicknameBtn"
                                     class="text-amber-400 hover:text-amber-200 transition-colors" title="Editar nombre"
                                     onclick="mostrarEditarNickname()">
-                                    âœï¸
+                                    ✏️
                                 </button>
                             </div>
                             <div class="flex items-center gap-2 mb-3">
@@ -442,7 +441,7 @@
                     </div>
                 </div>
 
-                <!-- ESTADÃSTICAS: NIVEL, XP, ORO -->
+                <!-- ESTADÍSTICAS: NIVEL, XP, ORO -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <!-- NIVEL -->
                     <div class="glass-panel rounded-lg p-4 border border-indigo-600/30 text-center">
@@ -475,17 +474,17 @@
                         </div>
                     </div>
                     <div class="mt-2 text-[10px] text-slate-500">
-                        <span id="profileXPPercent">0%</span> - <span id="profileNextLevel">PrÃ³ximo nivel: 1000
+                        <span id="profileXPPercent">0%</span> - <span id="profileNextLevel">Próximo nivel: 1000
                             XP</span>
                     </div>
                 </div>
 
-                <!-- CERRAR SESIÃ“N -->
+                <!-- CERRAR SESIÓN -->
                 <div class="glass-panel rounded-lg p-4 border border-red-900/30">
                     <button onclick="logoutUser(this)"
                         class="w-full flex items-center justify-center gap-2 text-red-400 hover:text-red-300 hover:bg-red-950/30 transition-colors py-2 rounded-lg text-sm font-semibold tracking-wider">
-                        <span>ðŸšª</span>
-                        <span>CERRAR SESIÃ“N</span>
+                        <span>🚪</span>
+                        <span>CERRAR SESIÓN</span>
                     </button>
                 </div>
 
@@ -499,7 +498,7 @@
                     class="flex-1 flex items-start gap-2 text-amber-500 bg-black/20 p-2 rounded border border-slate-700/50">
                     <span class="pt-2.5">></span>
                     <textarea id="chatInput" class="sam-input placeholder-slate-600 resize-none overflow-y-auto max-h-40"
-                        rows="1" placeholder="Escribe tu gesta aquÃ­..." autocomplete="off"></textarea>
+                        rows="1" placeholder="Escribe tu gesta aquí..." autocomplete="off"></textarea>
                 </div>
                 <button id="sendGestaBtn"
                     class="bg-amber-600 hover:bg-amber-500 text-black font-bold p-2 px-4 rounded shadow-lg transition-transform active:scale-95 flex items-center justify-center h-10">
@@ -508,7 +507,7 @@
             </div>
         </div>
 
-        <!-- BARRA DE NAVEGACIÃ“N (TAB BAR) -->
+        <!-- BARRA DE NAVEGACIÓN (TAB BAR) -->
         <nav
             class="bg-black/60 border-t border-amber-900/30 p-2 flex justify-around items-center rounded-b-xl backdrop-blur-md">
             <button
@@ -553,8 +552,8 @@
 
     <!-- Panel de Desarrollador para Time Mocking -->
     <div id="devPanel" class="hidden dev-panel">
-        <h4 class="font-bold mb-2">MÃ¡quina del Tiempo</h4>
-        <label for="daysOffset">Adelantar DÃ­as:</label>
+        <h4 class="font-bold mb-2">Máquina del Tiempo</h4>
+        <label for="daysOffset">Adelantar Días:</label>
         <input type="number" id="daysOffset" value="0" class="bg-slate-800 text-amber-400 w-16 text-center">
         <button id="timeTravelBtn" class="bg-amber-600 text-black px-2 py-1 rounded">Viajar</button>
     </div>
@@ -567,32 +566,33 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./service-worker.js')
                     .then((reg) => {
-                        console.log('âœ… Service Worker registrado exitosamente:', reg);
+                        console.log('✅ Service Worker registrado exitosamente:', reg);
                     })
                     .catch((err) => {
-                        console.warn('âš ï¸ Error registrando Service Worker:', err);
+                        console.warn('⚠️ Error registrando Service Worker:', err);
                     });
             });
         }
 
-        // Easter Egg: Comando de crÃ©ditos en consola
+        // Easter Egg: Comando de créditos en consola
         window.credits = function () {
             console.clear();
-            console.log('%câ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•', 'color: #fbbf24; font-weight: bold');
-            console.log('%cðŸ† S.A.M. - EL LIBRO ROJO', 'color: #fbbf24; font-size: 16px; font-weight: bold');
-            console.log('%câ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•', 'color: #fbbf24; font-weight: bold');
+            console.log('%c═══════════════════════════════════════════════', 'color: #fbbf24; font-weight: bold');
+            console.log('%c🏆 S.A.M. - EL LIBRO ROJO', 'color: #fbbf24; font-size: 16px; font-weight: bold');
+            console.log('%c═══════════════════════════════════════════════', 'color: #fbbf24; font-weight: bold');
             console.log('%cForjado por:', 'color: #e2e8f0; font-weight: bold');
-            console.log('%cJavier GonzÃ¡lez Olivera', 'color: #fbbf24; font-size: 14px; font-weight: bold');
+            console.log('%cJavier González Olivera', 'color: #fbbf24; font-size: 14px; font-weight: bold');
             console.log('%c', 'color: #e2e8f0');
-            console.log('%cTrabajo Final de MÃ¡ster 2026', 'color: #94a3b8; font-style: italic');
-            console.log('%câ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•', 'color: #fbbf24; font-weight: bold');
-            console.log('%cðŸ—¡ï¸ "No todo lo que brilla es oro, pero toda gesta cuenta" - Gandalf', 'color: #cbd5e1; font-style: italic');
-            console.log('%câ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•', 'color: #fbbf24; font-weight: bold');
+            console.log('%cTrabajo Final de Máster 2026', 'color: #94a3b8; font-style: italic');
+            console.log('%c═══════════════════════════════════════════════', 'color: #fbbf24; font-weight: bold');
+            console.log('%c🗡️ "No todo lo que brilla es oro, pero toda gesta cuenta" - Gandalf', 'color: #cbd5e1; font-style: italic');
+            console.log('%c═══════════════════════════════════════════════', 'color: #fbbf24; font-weight: bold');
         };
     </script>
 
 </body>
 
 </html>
+
 
 
