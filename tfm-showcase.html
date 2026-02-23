@@ -205,6 +205,10 @@
             .grid-cards {
                 grid-template-columns: 1fr;
             }
+
+            .card.span-2 {
+                grid-column: span 1;
+            }
         }
 
         .card {
@@ -220,6 +224,26 @@
             font-size: 14px;
             text-transform: uppercase;
             letter-spacing: .04em;
+        }
+
+        .grid-cards .card:nth-child(4n+1) h3 {
+            color: #fbbf24;
+        }
+
+        .grid-cards .card:nth-child(4n+2) h3 {
+            color: #7dd3fc;
+        }
+
+        .grid-cards .card:nth-child(4n+3) h3 {
+            color: #86efac;
+        }
+
+        .grid-cards .card:nth-child(4n+4) h3 {
+            color: #fda4af;
+        }
+
+        .card.span-2 {
+            grid-column: span 2;
         }
 
         .card p,
@@ -285,7 +309,7 @@
                 <span class="chip">BigSchool</span>
                 <span class="chip">MoureDev</span>
             </div>
-            <h1 class="mt-4 text-3xl md:text-4xl font-black tracking-tight text-amber-300">S.A.M. EL LIBRO ROJO</h1>
+            <h1 class="mt-4 text-3xl md:text-4xl font-black tracking-tight text-amber-300">S.A.M. (Social Achievement Manager) EL LIBRO ROJO</h1>
             <p class="mt-2 text-slate-300 text-sm md:text-base leading-relaxed">
                 Plataforma de productividad gamificada con IA, narrativa RPG y visualización táctica semanal.
                 Convierte tareas en gestas, traduce comportamiento en progreso visible y mejora la adherencia diaria.
@@ -441,7 +465,7 @@
                                 <p>El Palantír detecta riesgo de fallo con patrones recientes y propone acciones concretas, no solo porcentajes.</p>
                                 <p>Ejemplo: tres fallos seguidos los jueves de la semana pasada -> el siguiente miércoles recomienda descansar bien para tener fuerzas al día siguiente.</p>
                             </div>
-                            <div class="card">
+                            <div class="card span-2">
                                 <h3>Motor de experiencia</h3>
                                 <p>La IA no está de adorno. Es la parte que hace que la app se sienta viva: adapta mensajes, acompaña con buen tono y ayuda a que el usuario no se hunda cuando encadena fallos.</p>
                                 <p>Gracias a eso, la experiencia es más humana, más positiva y más fácil de mantener día tras día.</p>
@@ -474,10 +498,12 @@
                         <div class="card">
                             <h3>De idea simple a app con alma</h3>
                             <p>Me ha sorprendido muchísimo haber podido crear algo tan robusto. Sinceramente, no creo que lo hubiera logrado sin todo lo aprendido en el máster. Ahí entendí cómo usar bien distintas IAs como herramientas, pero siendo yo quien manda, quien decide y quien dirige todo el proceso como un director de orquesta.</p>
+                            <p>Vengo de hacer DAW, por lo que me he sentido cómodo haciendo la app web. Está lista para el deploy para convertirla en PWA, y eso es lo siguiente que voy a hacer para compartirla con mis amigos.</p>
                             <p>Siento que ahora ya podría hacer casi cualquier cosa en el mundo del desarrollo de apps. Me lo he pasado muy bien, aunque también he peleado con bugs a tope, muchísimos bugs, y con errores míos por no tener copias de seguridad o por trabajar desde main en vez de tirar de branch.</p>
                             <p>Aun así, me he divertido, me he motivado y he metido todo lo que he podido sin romper el proyecto. Quise hacer refactorizaciones más grandes, pero los modelos de IA de los que dispongo muchas veces fallaban a mitad del proceso y tocó priorizar entrega estable.</p>
                             <p>Esto es lo que entrego para el 23 de febrero de 2026. Y aunque lo entregue así, me quedo con ganas reales de seguir mejorándola por mi cuenta, por hobby y porque me considero Developer. Si lo puedes imaginar, lo puedes programar.</p>
-                            <h3 class="mt-4">Invitación final</h3>
+                            <br><br>
+                            <h3 class="mt-8">Invitación final</h3>
                             <p>La mejor forma de entender todo esto es usar la app unos días: crear gestas, completarlas, fallar alguna, ver cómo reacciona S.A.M. y notar cómo cambia tu constancia. Ahí se entiende de verdad el valor del proyecto.</p>
                         </div>
                     </article>
