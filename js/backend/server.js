@@ -468,26 +468,27 @@ app.post('/api/gandalf/judge', authMiddleware, async (req, res) => {
         }
 
         // �🛡️ PROTOCOLO DE INCURSIÓN: PROCESAR DAÑO GLOBAL
+        // 🏆 PROCESAR DAÑO GLOBAL + LOGROS (síncronos para incluir resultado en respuesta)
+        let newAchievements = null;
         if (successIds.length > 0) {
-            setImmediate(async () => {
-                try {
-                    await procesarDanioGlobal(userId, successIds);
-                    checkGlobalFury();
-                    // 🏆 Verificar logros después de completar gestas
-                    await checkAchievements(userId);
-                } catch (e) {
-                    console.error("❌ Error en Protocolo de Incursión:", e.message);
-                }
-            });
+            try {
+                await procesarDanioGlobal(userId, successIds);
+                checkGlobalFury();
+                // Verificar logros ANTES de responder para incluirlos en la respuesta
+                newAchievements = await checkAchievements(userId);
+            } catch (e) {
+                console.error("❌ Error en Protocolo de Incursión:", e.message);
+            }
         }
 
-        // ✅ RESPUESTA CON RECOMPENSAS INCLUIDAS
+        // ✅ RESPUESTA CON RECOMPENSAS Y LOGROS INCLUIDOS
         res.json({
             success: true,
             message: "El juicio de Mithrandir ha concluido. El destino de las gestas ha sido sellado.",
             rewards: recompensasOtorgadas,  // Lista de materiales ganados
             updatedXP: updatedXP,
-            updatedLevel: updatedLevel
+            updatedLevel: updatedLevel,
+            newAchievements: newAchievements  // Lista actualizada de logros desbloqueados
         });
 
         console.log(`✅ GANDALF JUDGE ENDPOINT COMPLETADO - XP: ${updatedXP}, Level: ${updatedLevel}`);
