@@ -919,8 +919,13 @@ window.juicioGandalf = async (id, veredicto) => {
             // Recargar la lista y perfil después del fade out (1500ms total)
             setTimeout(async () => {
                 await cargarMisiones();
-                // Ya no es necesario llamar a actualizarPerfilUsuario() para el XP
-                renderDedicatedAchievements(); // Refrescar logros
+                // Si el backend ya devolvió los achievements actualizados, usarlos directamente
+                // para evitar race condition (el backend los calcula async)
+                if (respuesta.newAchievements !== undefined && respuesta.newAchievements !== null) {
+                    renderDedicatedAchievements(respuesta.newAchievements);
+                } else {
+                    renderDedicatedAchievements();
+                }
             }, 1500);
         } else {
             console.error("Fallo del Juicio en el backend.");
@@ -1974,7 +1979,7 @@ function renderForge(recipes, inventory) {
 }
 
 // --- LOGROS DEDICADOS (GALERÍA EN CUADRÍCULA) ---
-async function renderDedicatedAchievements() {
+async function renderDedicatedAchievements(preloadedAchievements) {
     const grid = document.getElementById('achievementsGrid');
     const totalLabel = document.getElementById('achievementsTotal');
     if (!grid) return;
@@ -1983,25 +1988,29 @@ async function renderDedicatedAchievements() {
     if (!token) return;
 
     try {
-        // Forzar recarga de datos del perfil
-        await actualizarPerfilUsuario();
-
-        const { data: profile } = await samClient.from('profiles').select('achievements').single();
-        let unlockedRaw = profile?.achievements || {};
-
-        // IMPORTANTE: Validar y limpiar achievements
         let unlockedIds = [];
-        if (Array.isArray(unlockedRaw)) {
-            unlockedIds = unlockedRaw;
-        } else if (typeof unlockedRaw === 'object' && unlockedRaw !== null) {
-            unlockedIds = Object.keys(unlockedRaw);
-        } else if (typeof unlockedRaw === 'string') {
-            // Si es string, intentar parsearlo como array
-            try {
-                unlockedIds = JSON.parse(unlockedRaw);
-                if (!Array.isArray(unlockedIds)) unlockedIds = [];
-            } catch {
-                unlockedIds = [];
+
+        // Si tenemos los achievements del backend en la respuesta, usarlos directamente
+        if (preloadedAchievements !== undefined && preloadedAchievements !== null) {
+            unlockedIds = Array.isArray(preloadedAchievements) ? preloadedAchievements : [];
+        } else {
+            // Fallback: consultar Supabase
+            await actualizarPerfilUsuario();
+            const { data: profile } = await samClient.from('profiles').select('achievements').single();
+            let unlockedRaw = profile?.achievements || {};
+
+            // IMPORTANTE: Validar y limpiar achievements
+            if (Array.isArray(unlockedRaw)) {
+                unlockedIds = unlockedRaw;
+            } else if (typeof unlockedRaw === 'object' && unlockedRaw !== null) {
+                unlockedIds = Object.keys(unlockedRaw);
+            } else if (typeof unlockedRaw === 'string') {
+                try {
+                    unlockedIds = JSON.parse(unlockedRaw);
+                    if (!Array.isArray(unlockedIds)) unlockedIds = [];
+                } catch {
+                    unlockedIds = [];
+                }
             }
         }
 
