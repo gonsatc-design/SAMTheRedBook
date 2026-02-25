@@ -176,6 +176,16 @@ function obtenerFraseSamAleatoria() {
 }
 async function cargarMisiones(mockDate = null) {
     try {
+        // Show loading state immediately so we never flash stale "No hay misiones activas"
+        taskContainer.innerHTML = `
+            <div class="flex items-center justify-center gap-3 text-xs text-amber-500/50 italic p-8 mt-8">
+                <svg class="animate-spin h-5 w-5 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Consultando el Libro Rojo...</span>
+            </div>
+        `;
         const token = await obtenerToken();
         if (!token) {
             taskContainer.innerHTML = `
@@ -765,13 +775,18 @@ async function enviarChat() {
             }, 2000); // 2 segundos de respiro
         } else {
             // Si falla, mostramos el error que pueda venir del backend
-            const errorMsg = data.error || "La respuesta de Sam se perdió en el viento. Prueba otra vez";
+            const errorMsg = data.error || "La respuesta de Sam se perdió entre las sombras... pero los Hobbits no se rinden. ¡El Libro Rojo sigue en pie! Prueba de nuevo, ¡la gesta te espera!";
             mostrarRespuestaSam([{ reply: errorMsg }]);
         }
     } catch (err) {
         console.error(err);
-        tempMsg.innerText = "❌ Error al contactar con Sam.";
-        tempMsg.className = "text-xs text-red-500 p-2";
+        tempMsg.innerHTML = `
+            <div class="text-center p-3">
+                <p class="text-sm font-bold text-red-400 mb-1">⚔️ Sam no pudo conectar con el servidor</p>
+                <p class="text-xs text-slate-400 leading-relaxed">El servidor puede estar despertando de su descanso. Los grandes héroes no se rinden ante el primer obstáculo: <span class="text-amber-400 font-bold">¡vuelve a intentarlo en unos segundos!</span></p>
+            </div>
+        `;
+        tempMsg.className = "text-center";
     }
 }
 

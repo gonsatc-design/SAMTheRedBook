@@ -460,3 +460,14 @@ canvas {
 .guide-panel {
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.96));
 }
+
+/* === MOBILE SAFE AREA (iOS notch, Android gesture/nav bar) === */
+/* viewport-fit=cover extends the viewport under OS bars; env() gives us the inset size */
+.app-shell-premium > nav {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+}
+
+/* Also pad body bottom so the shell can breathe on devices with persistent nav bars */
+body {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
