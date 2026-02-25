@@ -1017,7 +1017,7 @@ async function actualizarPerfilUsuario() {
 
             // Actualizar HUD
             if (playerLevel) playerLevel.innerText = `NIVEL ${p.level}`;
-            if (playerTitle) playerTitle.innerText = p.race_title || 'Aventurero';
+            if (playerTitle) playerTitle.innerText = p.race_title || 'Aventurero/a';
             if (document.getElementById('playerRace')) document.getElementById('playerRace').innerText = normalizeRaceClient(p.race) || 'Sin Raza';
             if (playerGold) playerGold.innerText = `💰 ${p.gold.toLocaleString()} Oro`;
 
@@ -1057,8 +1057,8 @@ function cargarLogrosUsuario(unlockedIds) {
     // Expandimos el mock de logros para el perfil con info de obtención
     const mockLogros = [
         { id: 'tasks_1', name: 'Primer Paso', icon: '🦶', desc: 'Completa tu primera misión', target: 1, category: 'tasks' },
-        { id: 'tasks_10', name: 'Aventurero Local', icon: '📜', desc: 'Completa 10 misiones', target: 10, category: 'tasks' },
-        { id: 'tasks_25', name: 'Héroe de la Comarca', icon: '🍺', desc: 'Completa 25 misiones', target: 25, category: 'tasks' },
+        { id: 'tasks_10', name: 'Aventurero/a Local', icon: '📜', desc: 'Completa 10 misiones', target: 10, category: 'tasks' },
+        { id: 'tasks_25', name: 'Héroe/Heroína de la Comarca', icon: '🍺', desc: 'Completa 25 misiones', target: 25, category: 'tasks' },
         { id: 'salud_5', name: 'Vigía de la Salud', icon: '💚', desc: 'Completa 5 misiones de Salud', target: 5, category: 'salud' },
         { id: 'estudio_10', name: 'Escriba de Minas Tirith', icon: '📖', desc: 'Completa 10 misiones de Estudio', target: 10, category: 'estudio' },
         { id: 'damage_1k', name: 'Pequeña Espina', icon: '🗡️', desc: 'Inflige 1,000 de daño a Sauron', target: 1000, category: 'damage' },
@@ -1145,7 +1145,7 @@ function openRaceSelectionModal(mode = 'onboarding') {
         if (raceModalTitle) raceModalTitle.innerText = 'RITO DE TRANSFIGURACIÓN';
         if (raceModalSubtitle) raceModalSubtitle.innerText = `Cambiar de raza cuesta ${RACE_CHANGE_COST.toLocaleString()} de oro. Es una decisión casi irreversible.`;
     } else {
-        if (raceModalTitle) raceModalTitle.innerText = '¿ERES EL PORTADOR DEL ANILLO?';
+        if (raceModalTitle) raceModalTitle.innerText = '¿ERES EL/LA PORTADOR/A DEL ANILLO?';
         if (raceModalSubtitle) raceModalSubtitle.innerText = 'Solo Sam (S.A.M.) te acompaña y registrará tus gestas. En tus manos está el destino.';
     }
 
@@ -1732,7 +1732,8 @@ function actualizarVisualRaid(status) {
 
     const remainingPercent = Math.max(0, Math.min(100, Number(percent)));
     sauronHPBar.style.width = `${remainingPercent}%`;
-    sauronHPText.innerText = `${remainingPercent.toFixed(1)}% restante`;
+    const pasos = Math.round(remainingPercent * 1000);
+    sauronHPText.innerText = `${pasos.toLocaleString('es-ES')} pasos restantes`;
     if (bossName) bossName.innerText = 'Distancia hasta llegar al Monte del Destino';
     if (bossIcon) bossIcon.innerText = '🌋';
     if (journeyProgressMarker) journeyProgressMarker.style.left = `${remainingPercent}%`;
