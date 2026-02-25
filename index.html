@@ -106,21 +106,35 @@
             </div>
         </header>
 
-        <!-- Panel del Juicio de Gandalf (Oculto por defecto) -->
+        <!-- Panel del Juicio de Gandalf — Recordatorio de cierre de día -->
+        <!-- Empieza en top-16 (64px) para quedar debajo del header/barra de vida -->
         <div id="gandalfModal"
-            class="hidden absolute inset-0 z-10 p-4 flex flex-col items-center justify-center gandalf-modal">
-            <div
-                class="w-full h-full max-h-[80vh] gandalf-scroll rounded-lg border-2 border-amber-800 flex flex-col p-6">
-                <h2 class="text-2xl font-bold text-center mb-4 border-b-2 border-amber-800/30 pb-2">Un Asunto Pendiente
-                </h2>
-                <p class="text-center text-sm mb-6">"Un mago nunca llega tarde. Ni pronto. Llega
-                    precisamente cuando se lo propone. Y hoy me propongo resolver esto."</p>
-                <div id="gandalfTaskList" class="flex-1 overflow-y-auto space-y-4 pr-2">
+            class="hidden absolute left-0 right-0 bottom-0 z-10 gandalf-modal flex flex-col" style="top:64px">
+            <div class="flex-1 flex flex-col p-4 overflow-hidden">
+
+                <!-- Cabecera: título + descripción + botón cerrar -->
+                <div class="flex items-start gap-3 mb-2">
+                    <div class="flex-1">
+                        <h2 class="text-base font-bold text-amber-900 leading-tight">⚖️ Cierre del Día</h2>
+                        <p class="text-[11px] text-amber-800/80 mt-1 leading-snug">Tienes gestas de ayer sin resolver.
+                            Ciérralas aquí o pulsa <strong>✕</strong> para hacerlo después desde las tarjetas.</p>
+                    </div>
+                    <button id="cerrarJuicioBtn"
+                        class="text-amber-800 hover:text-amber-600 text-2xl leading-none font-bold flex-shrink-0 px-1"
+                        title="Cerrar recordatorio">✕</button>
+                </div>
+
+                <p class="text-[10px] text-amber-800/50 italic border-t border-amber-800/30 pt-2 mb-3">
+                    "Un mago nunca llega tarde. Ni pronto. Llega precisamente cuando se lo propone."</p>
+
+                <div id="gandalfTaskList" class="flex-1 overflow-y-auto space-y-3 pr-1">
                     <!-- Las tareas pendientes se inyectarán aquí -->
                 </div>
+
                 <button id="sellarJuicioBtn"
-                    class="w-full mt-6 bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold py-3 rounded-lg shadow-lg">Sellar
-                    el Juicio</button>
+                    class="w-full mt-3 bg-amber-800 hover:bg-amber-700 disabled:opacity-60 text-amber-100 font-bold py-3 rounded-lg shadow-lg transition-all">
+                    Sellar el Juicio
+                </button>
             </div>
         </div>
 

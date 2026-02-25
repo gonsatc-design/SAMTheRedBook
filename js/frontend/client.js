@@ -36,6 +36,7 @@ const samReplyContainer = document.getElementById('samReplyContainer');
 const gandalfModal = document.getElementById('gandalfModal');
 const gandalfTaskList = document.getElementById('gandalfTaskList');
 const sellarJuicioBtn = document.getElementById('sellarJuicioBtn');
+const cerrarJuicioBtn = document.getElementById('cerrarJuicioBtn');
 // Elementos del Palantír
 const palantirOrb = document.getElementById('palantirOrb');
 const palantirAlerta = document.getElementById('palantirAlerta');
@@ -803,12 +804,12 @@ function activarJuicioGandalf(tareas) {
 
     tareas.forEach(tarea => {
         const div = document.createElement('div');
-        div.className = "p-3 bg-amber-100/50 rounded-md flex justify-between items-center";
+        div.className = "p-3 bg-amber-100/60 rounded-md";
         div.innerHTML = `
-            <span class="font-bold">${tarea.titulo_epico}</span>
+            <p class="font-bold text-amber-950 text-sm leading-snug mb-2">${tarea.titulo_epico}</p>
             <div class="flex gap-2" data-task-id="${tarea.id}">
-                <button class="gandalf-choice-btn bg-green-800 text-white px-3 py-1 rounded" data-verdict="exito">Éxito</button>
-                <button class="gandalf-choice-btn bg-red-800 text-white px-3 py-1 rounded" data-verdict="fracaso">Fracaso</button>
+                <button class="gandalf-choice-btn flex-1 bg-green-800 text-white px-3 py-2 rounded font-bold text-xs transition-all duration-200" data-verdict="exito">⚔️ Éxito</button>
+                <button class="gandalf-choice-btn flex-1 bg-red-900 text-white px-3 py-2 rounded font-bold text-xs transition-all duration-200" data-verdict="fracaso">💀 Fracaso</button>
             </div>
         `;
         gandalfTaskList.appendChild(div);
@@ -821,11 +822,16 @@ gandalfTaskList.addEventListener('click', (e) => {
         const verdict = e.target.dataset.verdict;
         juiciosPendientes[taskId] = verdict;
 
-        // Feedback visual
+        // Feedback visual: seleccionado brilla, el otro se atenúa
         e.target.parentElement.querySelectorAll('.gandalf-choice-btn').forEach(btn => {
-            btn.classList.remove('ring-4', 'ring-white');
+            if (btn === e.target) {
+                btn.classList.remove('opacity-30', 'scale-95');
+                btn.classList.add('ring-2', 'ring-white', 'scale-105', 'shadow-lg', 'brightness-125');
+            } else {
+                btn.classList.remove('ring-2', 'ring-white', 'scale-105', 'shadow-lg', 'brightness-125');
+                btn.classList.add('opacity-30', 'scale-95');
+            }
         });
-        e.target.classList.add('ring-4', 'ring-white');
     }
 });
 
@@ -834,12 +840,25 @@ sellarJuicioBtn.addEventListener('click', async () => {
     const failureIds = Object.keys(juiciosPendientes).filter(id => juiciosPendientes[id] === 'fracaso');
 
     if (successIds.length === 0 && failureIds.length === 0) {
-        alert("Debes emitir un juicio para cada asunto.");
+        alert("Debes emitir un juicio para cada asunto pendiente.");
         return;
     }
 
     const token = await obtenerToken();
     if (!token) return;
+
+    // Bloquear toda la UI del juicio mientras procesa
+    sellarJuicioBtn.disabled = true;
+    sellarJuicioBtn.innerHTML = `
+        <span class="flex items-center justify-center gap-2">
+            <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Sellando el Juicio...
+        </span>`;
+    document.querySelectorAll('.gandalf-choice-btn').forEach(b => b.disabled = true);
+    if (cerrarJuicioBtn) cerrarJuicioBtn.disabled = true;
 
     try {
         await fetch(`${API_BASE}/api/gandalf/judge`, {
@@ -852,12 +871,27 @@ sellarJuicioBtn.addEventListener('click', async () => {
         chatInput.disabled = false;
         chatInput.placeholder = "Escribe tu gesta aquí...";
         autoResizeChatInput();
-        cargarMisiones(); // Recargamos para ver el resultado
+        cargarMisiones();
     } catch (err) {
         console.error("Error al sellar el juicio:", err);
+        // Restaurar botón si falla
+        sellarJuicioBtn.disabled = false;
+        sellarJuicioBtn.innerHTML = 'Sellar el Juicio';
+        document.querySelectorAll('.gandalf-choice-btn').forEach(b => b.disabled = false);
+        if (cerrarJuicioBtn) cerrarJuicioBtn.disabled = false;
     }
 });
 
+
+// Cerrar el recordatorio sin resolver (el usuario lo hará desde las tarjetas)
+if (cerrarJuicioBtn) {
+    cerrarJuicioBtn.addEventListener('click', () => {
+        gandalfModal.classList.add('hidden');
+        chatInput.disabled = false;
+        chatInput.placeholder = "Escribe tu gesta aquí...";
+        autoResizeChatInput();
+    });
+}
 
 // --- JUICIO DE GANDALF (ACTUALIZADO) ---
 window.juicioGandalf = async (id, veredicto) => {
