@@ -766,12 +766,15 @@ async function enviarChat() {
     const text = chatInput.value;
     if (!text.trim()) return;
 
+    // Bloquear input inmediatamente para evitar doble envío
+    chatInput.disabled = true;
     chatInput.value = '';
     autoResizeChatInput();
     const token = await obtenerToken();
 
     if (!token) {
         alert("⚠️ ¡Alto ahí! Identifícate primero.");
+        chatInput.disabled = false;
         return;
     }
 
@@ -797,19 +800,19 @@ async function enviarChat() {
         });
 
         const data = await res.json();
-        tempMsg.remove(); // Quitamos el mensaje de "enviando..."
+        tempMsg.remove();
 
         if (data.success && data.mensajes) {
             showToast("¡Gesta Registrada!", "success");
             mostrarRespuestaSam(data.mensajes);
-            // Esperamos un poco a que el usuario lea el mensaje antes de recargar
-            setTimeout(() => {
-                cargarMisiones();
-            }, 2000); // 2 segundos de respiro
+            // Recarga rápida (500ms): siempre antes del reload del juicio (1500ms)
+            // para que el juicio siempre sea la última renderización
+            setTimeout(() => cargarMisiones(), 500);
         } else {
-            // Si falla, mostramos el error que pueda venir del backend
-            const errorMsg = data.error || "La respuesta de Sam se perdió entre las sombras... pero los Hobbits no se rinden. ¡El Libro Rojo sigue en pie! Prueba de nuevo, ¡la gesta te espera!";
+            // SAM ocupado u otro error: mostrar mensaje y recargar la lista igualmente
+            const errorMsg = data.error || "La respuesta de Sam se perdió entre las sombras... ¡vuelve a intentarlo!";
             mostrarRespuestaSam([{ reply: errorMsg }]);
+            cargarMisiones(); // Recargar para mostrar el estado real sin necesitar F5
         }
     } catch (err) {
         console.error(err);
@@ -820,6 +823,10 @@ async function enviarChat() {
             </div>
         `;
         tempMsg.className = "text-center";
+    } finally {
+        // Desbloquear input siempre al terminar (éxito, error o excepción)
+        chatInput.disabled = false;
+        chatInput.placeholder = "Escribe tu gesta aquí...";
     }
 }
 
