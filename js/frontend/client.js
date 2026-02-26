@@ -51,6 +51,7 @@ const raceSelectionModal = document.getElementById('raceSelectionModal');
 const raceModalTitle = document.getElementById('raceModalTitle');
 const raceModalSubtitle = document.getElementById('raceModalSubtitle');
 const changeRaceBtn = document.getElementById('changeRaceBtn');
+let lastOpenedItemWasNew = false;
 
 // === SISTEMA DE XP: MISMA CURVA QUE EL BACKEND ===
 function getXPThresholdForLevel(level) {
@@ -1461,6 +1462,8 @@ function renderInventory(items, viewedItemsKey = 'viewedItems_anon') {
         `;
 
         card.onclick = () => {
+            // Solo recargar la mochila al cerrar si el item era NEW
+            lastOpenedItemWasNew = isNew;
             // Marcar item como visto
             if (!viewedItems.includes(itemName)) {
                 viewedItems.push(itemName);
@@ -1490,16 +1493,17 @@ function showItemDetail(item, icon) {
 
 document.getElementById('closeItemDetail').onclick = () => {
     itemDetailModal.classList.add('hidden');
-    // Recargar el inventario inmediatamente al cerrar para que desaparezca el badge NEW
-    loadInventory();
+    // Solo recargar si el item tenía badge NEW (para que desaparezca)
+    if (lastOpenedItemWasNew) loadInventory();
+    lastOpenedItemWasNew = false;
 };
 
 // Cerrar modal al hacer clic fuera
 itemDetailModal.onclick = (e) => {
     if (e.target === itemDetailModal) {
         itemDetailModal.classList.add('hidden');
-        // Recargar el inventario inmediatamente al cerrar para que desaparezca el badge NEW
-        loadInventory();
+        if (lastOpenedItemWasNew) loadInventory();
+        lastOpenedItemWasNew = false;
     }
 };
 
