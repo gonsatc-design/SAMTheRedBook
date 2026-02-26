@@ -207,16 +207,18 @@ function obtenerFraseSamAleatoria() {
 }
 async function cargarMisiones(mockDate = null) {
     try {
-        // Show loading state immediately so we never flash stale "No hay misiones activas"
-        taskContainer.innerHTML = `
-            <div class="flex items-center justify-center gap-3 text-xs text-amber-500/50 italic p-8 mt-8">
-                <svg class="animate-spin h-5 w-5 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Consultando el Libro Rojo...</span>
-            </div>
-        `;
+        // Mostrar spinner solo en carga inicial (contenedor vacío); en recargas, actualizar en silencio
+        if (!taskContainer.hasChildNodes()) {
+            taskContainer.innerHTML = `
+                <div class="flex items-center justify-center gap-3 text-xs text-amber-500/50 italic p-8 mt-8">
+                    <svg class="animate-spin h-5 w-5 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Consultando el Libro Rojo...</span>
+                </div>
+            `;
+        }
         const token = await obtenerToken();
         if (!token) {
             taskContainer.innerHTML = `
