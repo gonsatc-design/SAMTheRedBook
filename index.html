@@ -141,9 +141,8 @@
         <!-- MODAL DE SELECCIÓN DE RAZA (BLOQUE 0) -->
         <div id="raceSelectionModal"
             class="hidden absolute inset-0 z-[100] bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center">
-            <h2 id="raceModalTitle" class="text-2xl font-bold text-amber-500 mb-2">¿ERES EL/LA PORTADOR/A DEL ANILLO?</h2>
-            <p id="raceModalSubtitle" class="text-xs text-slate-400 mb-8 italic">Solo Sam (S.A.M.) te acompaña y registrará tus gestas. En
-                tus manos está el destino.</p>
+            <h2 id="raceModalTitle" class="text-2xl font-bold text-amber-500 mb-2">¡Vaya, una nueva cara por aquí! Mmh... ¡Bienvenido/a pues! Dime, que desde aquí no te veo muy bien... ¿De qué raza eres?</h2>
+            <p id="raceModalSubtitle" class="text-xs text-slate-400 mb-8 italic">Selecciona tu Raza — con la que sientas más afinidad, que te represente... o que percibas que fuiste en una vida pasada.</p>
 
             <div class="grid grid-cols-2 gap-4 w-full max-w-md">
                 <button
@@ -230,7 +229,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <!-- HUMANO -->
                 <div class="bg-slate-900/80 p-3 rounded border border-slate-700 shadow-lg">
-                    <h3 class="text-xs text-amber-500 mb-2 text-center uppercase">Semana de Humano</h3>
+                    <h3 class="text-xs text-amber-500 mb-2 text-center uppercase">Raza Humana</h3>
                     <div class="relative h-48">
                         <canvas id="raceChartHumano"></canvas>
                     </div>
@@ -238,7 +237,7 @@
 
                 <!-- ELFO -->
                 <div class="bg-slate-900/80 p-3 rounded border border-slate-700 shadow-lg">
-                    <h3 class="text-xs text-emerald-400 mb-2 text-center uppercase">Semana de Elfo</h3>
+                    <h3 class="text-xs text-emerald-400 mb-2 text-center uppercase">Elfos</h3>
                     <div class="relative h-48">
                         <canvas id="raceChartElfo"></canvas>
                     </div>
@@ -246,7 +245,7 @@
 
                 <!-- ENANO -->
                 <div class="bg-slate-900/80 p-3 rounded border border-slate-700 shadow-lg">
-                    <h3 class="text-xs text-orange-300 mb-2 text-center uppercase">Semana de Enano</h3>
+                    <h3 class="text-xs text-orange-300 mb-2 text-center uppercase">Enanos</h3>
                     <div class="relative h-48">
                         <canvas id="raceChartEnano"></canvas>
                     </div>
@@ -254,7 +253,7 @@
 
                 <!-- HOBBIT -->
                 <div class="bg-slate-900/80 p-3 rounded border border-slate-700 shadow-lg">
-                    <h3 class="text-xs text-yellow-300 mb-2 text-center uppercase">Semana de Hobbit</h3>
+                    <h3 class="text-xs text-yellow-300 mb-2 text-center uppercase">Hobbits</h3>
                     <div class="relative h-48">
                         <canvas id="raceChartHobbit"></canvas>
                     </div>
@@ -267,7 +266,7 @@
             <div class="mt-3 rounded border border-slate-700/50 bg-black/20 p-3">
                 <p class="text-[11px] text-slate-300 leading-relaxed">
                     Aquí ves la guerra semanal por razas. Cada gráfica muestra de lunes a domingo
-                    las gestas cumplidas frente a las fallidas para Humano, Elfo, Enano y Hobbit.
+                    las gestas cumplidas frente a las fallidas para Humanos, Elfos, Enanos y Hobbits.
                 </p>
                 <p class="text-[10px] text-slate-400 mt-2">
                     Reinicio semanal automático: domingo a las 23:59.
@@ -352,7 +351,7 @@
                     <section class="rounded border border-amber-700/50 bg-amber-950/20 p-4">
                         <h3 class="font-bold uppercase text-xs tracking-widest mb-3 text-amber-400">🌍 CONTEXTO — LA TIERRA MEDIA TE NECESITA</h3>
                         <p class="mb-3">Esta aplicación está inspirada en la obra de <strong class="text-amber-300">J.R.R. Tolkien</strong> y en el universo de <em>El Señor de los Anillos</em>. Nos situamos en un momento crucial: la Comunidad del Anillo se reúne en Rivendel, pero el destino da un giro inesperado. Frodo cae gravemente enfermo antes de partir, y el Concilio de Elrond se vuelve hacia ti.</p>
-                        <p class="mb-3"><strong class="text-amber-200">Tú serás el/la nuevo/a Portador/a del Anillo.</strong> Sam (S.A.M.) te acompañará fielmente, registrando cada hazaña en el Libro Rojo para la eternidad. El peso del Anillo es tuyo. El destino de la Tierra Media, también.</p>
+                        <p class="mb-3"><strong class="text-amber-200">Tú serás el/la Portador/a del Anillo.</strong> Sam (S.A.M.) te acompañará fielmente, registrando cada hazaña en el Libro Rojo para la eternidad. El peso del Anillo es tuyo. El destino de la Tierra Media, también.</p>
                         <p class="text-amber-100/80">Pero no caminas solo/a. <strong>Cada usuario de esta aplicación forma parte de la misma cruzada épica.</strong> Cada tarea que completes es un paso colectivo hacia el Monte del Destino — tus victorias y las de tus compañeros/as se suman en una travesía compartida que determina si la luz prevalece sobre la Sombra. Cada pequeña acción importa. La Compañía avanza junta.</p>
                         <p class="text-[11px] text-amber-500/70 italic mt-3">"Incluso la persona más pequeña puede cambiar el curso del futuro." — Galadriel</p>
                     </section>
@@ -451,11 +450,11 @@
                         <ul class="text-xs space-y-2 list-none p-3 rounded border border-slate-700 bg-slate-950/80 font-bold text-slate-100">
                             <li><strong class="text-amber-300">Humano/a:</strong> Granjero/a → Aventurero/a → Montaraz →
                                 Caballero/a → Paladín → Rey/Reina → Señor/a de Gondor → Heredero/a de Isildur</li>
-                            <li><strong class="text-emerald-300">Elfo:</strong> Novicio de Lórien → Explorador del
-                                Bosque → Guardián del Sendero → Arquero Maestro → Señor de los Caballos → Alto Consejero
-                                → Soberano Estelar → Señor de Rivendel</li>
-                            <li><strong class="text-orange-300">Enano:</strong> Minero de Moria → Picapedrero →
-                                Herrero de Erebor → Guardián del Tesoro → Señor del Yunque → Gran Escudo de Hierro → Rey
+                            <li><strong class="text-emerald-300">Elfo/a:</strong> Novicio/a de Lórien → Explorador/a del
+                                Bosque → Guardián/a del Sendero → Arquero/a Maestro/a → Señor/a de los Caballos → Alto/a Consejero/a
+                                → Soberano/a Estelar → Señor/a de Rivendel</li>
+                            <li><strong class="text-orange-300">Enano/a:</strong> Minero/a de Moria → Picapedrero/a →
+                                Herrero/a de Erebor → Guardián/a del Tesoro → Señor/a del Yunque → Gran Escudo de Hierro → Rey/Reina
                                 bajo la Montaña → Linaje de Durin</li>
                             <li><strong class="text-yellow-300">Hobbit:</strong> Habitante del Agujero → Cocinero de
                                 Bolsón → Buscador de Setas → Aventurero Local → Héroe de la Comarca → Portador de la

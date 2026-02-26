@@ -66,6 +66,16 @@ function getXPInCurrentLevel(totalXP, currentLevel) {
     for (let l = 1; l < currentLevel; l++) accumulated += getXPThresholdForLevel(l);
     return totalXP - accumulated;
 }
+function getLevelFromXP(totalXP) {
+    let level = 1, accumulated = 0;
+    while (level < 99) {
+        const threshold = getXPThresholdForLevel(level);
+        if (accumulated + threshold > totalXP) break;
+        accumulated += threshold;
+        level++;
+    }
+    return level;
+}
 // ==================================================
 
 // --- CONTROL GLOBAL ---
@@ -84,6 +94,10 @@ function normalizeRaceClient(race) {
         'Hobbit': 'Hobbit'
     };
     return map[race] || race || null;
+}
+function displayRace(race) {
+    const map = { 'Humano': 'Humanos', 'Elfo': 'Elfos', 'Enano': 'Enanos', 'Hobbit': 'Hobbits' };
+    return map[normalizeRaceClient(race)] || race || null;
 }
 
 // --- RAID HUD ELEMENTS ---
@@ -1066,16 +1080,17 @@ async function actualizarPerfilUsuario() {
             }
 
             // Actualizar HUD
-            if (playerLevel) playerLevel.innerText = `NIVEL ${p.level}`;
+            const computedLevel = getLevelFromXP(p.experience);
+            if (playerLevel) playerLevel.innerText = `NIVEL ${computedLevel}`;
             if (playerTitle) playerTitle.innerText = p.race_title || 'Aventurero/a';
-            if (document.getElementById('playerRace')) document.getElementById('playerRace').innerText = normalizeRaceClient(p.race) || 'Sin Raza';
+            if (document.getElementById('playerRace')) document.getElementById('playerRace').innerText = displayRace(p.race) || 'Sin Raza';
             if (playerGold) playerGold.innerText = `💰 ${p.gold.toLocaleString()} Oro`;
 
             // Actualizar Barra de XP (curva progresiva)
             const playerXPBar = document.getElementById('playerXPBar');
             if (playerXPBar) {
-                const xpCurrentLevel = getXPInCurrentLevel(p.experience, p.level);
-                const xpNeeded = getXPThresholdForLevel(p.level);
+                const xpCurrentLevel = getXPInCurrentLevel(p.experience, computedLevel);
+                const xpNeeded = getXPThresholdForLevel(computedLevel);
                 playerXPBar.style.width = `${Math.min(100, (xpCurrentLevel / xpNeeded) * 100)}%`;
             }
 
@@ -1195,8 +1210,8 @@ function openRaceSelectionModal(mode = 'onboarding') {
         if (raceModalTitle) raceModalTitle.innerText = 'RITO DE TRANSFIGURACIÓN';
         if (raceModalSubtitle) raceModalSubtitle.innerText = `Cambiar de raza cuesta ${RACE_CHANGE_COST.toLocaleString()} de oro. Es una decisión casi irreversible.`;
     } else {
-        if (raceModalTitle) raceModalTitle.innerText = '¿ERES EL/LA PORTADOR/A DEL ANILLO?';
-        if (raceModalSubtitle) raceModalSubtitle.innerText = 'Solo Sam (S.A.M.) te acompaña y registrará tus gestas. En tus manos está el destino.';
+        if (raceModalTitle) raceModalTitle.innerText = '¡Vaya, una nueva cara por aquí! Mmh... ¡Bienvenido/a pues! Dime, que desde aquí no te veo muy bien... ¿De qué raza eres?';
+        if (raceModalSubtitle) raceModalSubtitle.innerText = 'Selecciona tu Raza — con la que sientas más afinidad, que te represente... o que percibas que fuiste en una vida pasada.';
     }
 
     raceSelectionModal.classList.remove('hidden');
@@ -1495,9 +1510,6 @@ async function loadProfile() {
     }
 
     try {
-        // Obtener datos del usuario desde Supabase Auth
-        const { data: { user } } = await samClient.auth.getUser();
-
         // Obtener perfil con stats
         const res = await fetch(`${API_BASE}/api/profile/me`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -1513,14 +1525,14 @@ async function loadProfile() {
         if (data.success && data.profile) {
             const p = data.profile;
 
-            // Cargar nickname si existe, si no usar email
+            // Cargar nickname si existe, si no mostrar apodo genérico (no el email)
             if (document.getElementById('profileEmail')) {
-                document.getElementById('profileEmail').innerText = p.nickname || user.email || 'Usuario';
+                document.getElementById('profileEmail').innerText = p.nickname || 'Portador/a sin nombre';
             }
 
             // Actualizar Nivel, ORO, Raza (con validación de elementos)
             const profileLevel = document.getElementById('profileLevel');
-            if (profileLevel) profileLevel.innerText = p.level || 1;
+            if (profileLevel) profileLevel.innerText = getLevelFromXP(p.experience || 0);
 
             const profileGold = document.getElementById('profileGold');
             if (profileGold) profileGold.innerText = `${(p.gold || 0).toLocaleString()}`;
@@ -1535,10 +1547,10 @@ async function loadProfile() {
             }
 
             const playerRace = document.getElementById('playerRace');
-            if (playerRace) playerRace.innerText = normalizeRaceClient(p.race) || 'Sin Raza';
+            if (playerRace) playerRace.innerText = displayRace(p.race) || 'Sin Raza';
 
             const profileRaceTitle = document.getElementById('profileRaceTitle');
-            if (profileRaceTitle) profileRaceTitle.innerText = p.race_title || 'Aventurero';
+            if (profileRaceTitle) profileRaceTitle.innerText = p.race_title || 'Aventurero/a';
 
             // Icono de raza
             const profileRaceIcon = document.getElementById('profileRaceIcon');
@@ -1546,8 +1558,9 @@ async function loadProfile() {
             if (journeyRaceIcon) journeyRaceIcon.innerText = getRaceIcon(p.race);
 
             // BARRA DE XP (curva progresiva)
-            const xpCurrentLevel = getXPInCurrentLevel(p.experience || 0, p.level || 1);
-            const xpForNextLevel = getXPThresholdForLevel(p.level || 1);
+            const lvl = getLevelFromXP(p.experience || 0);
+            const xpCurrentLevel = getXPInCurrentLevel(p.experience || 0, lvl);
+            const xpForNextLevel = getXPThresholdForLevel(lvl);
             const xpProgress = Math.min(100, (xpCurrentLevel / xpForNextLevel) * 100);
 
             const xpBar = document.getElementById('profileXPBarLarge');
@@ -1938,7 +1951,10 @@ async function loadForge() {
         const inventoryData = await inventoryRes.json();
 
         if (recipesData.success && inventoryData.success) {
-            renderForge(recipesData.recipes, inventoryData.inventory);
+            // Obtener el oro del jugador para inyectarlo en el mapa de materiales disponibles
+            const { data: goldData } = await samClient.from('profiles').select('gold').single();
+            const playerCurrentGold = goldData?.gold || 0;
+            renderForge(recipesData.recipes, inventoryData.inventory, playerCurrentGold);
         }
     } catch (e) {
         console.error("Error al cargar la forja:", e);
@@ -1946,7 +1962,7 @@ async function loadForge() {
     }
 }
 
-function renderForge(recipes, inventory) {
+function renderForge(recipes, inventory, playerGold = 0) {
     const recipesGrid = document.getElementById('recipesGrid');
     if (recipesGrid) recipesGrid.innerHTML = '';
 
@@ -1956,6 +1972,8 @@ function renderForge(recipes, inventory) {
         acc[item.name || item.item_name] = (acc[item.name || item.item_name] || 0) + qty;
         return acc;
     }, {});
+    // Inyectar el oro del jugador como material disponible
+    available['Oro'] = playerGold;
 
     Object.entries(recipes).forEach(([name, receta]) => {
         const card = document.createElement('div');
