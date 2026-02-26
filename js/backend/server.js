@@ -464,26 +464,28 @@ app.post('/api/gandalf/judge', authMiddleware, async (req, res) => {
             try {
                 const { data: profile } = await supabase
                     .from('profiles')
-                    .select('experience, level')
+                    .select('experience, level, race')
                     .eq('id', userId)
                     .single();
 
                 if (profile) {
                     const newExp = (profile.experience || 0) + totalXP;
                     const newLevel = getLevelFromXP(newExp);
+                    const newRaceTitle = calcularTitulo(profile.race, newLevel);
 
                     const { error: updateError } = await supabase
                         .from('profiles')
                         .update({
                             experience: newExp,
-                            level: newLevel
+                            level: newLevel,
+                            race_title: newRaceTitle
                         })
                         .eq('id', userId);
 
                     if (updateError) {
                         console.error("❌ Error al actualizar XP del perfil:", updateError.message);
                     } else {
-                        console.log(`📈 XP SUMADO AL PERFIL: +${totalXP} XP (Total: ${newExp}, Nivel: ${newLevel})`);
+                        console.log(`📈 XP SUMADO AL PERFIL: +${totalXP} XP (Total: ${newExp}, Nivel: ${newLevel}, Título: ${newRaceTitle})`);
                     }
                 }
             } catch (e) {
@@ -1159,7 +1161,7 @@ app.get('/api/profile/me', authMiddleware, async (req, res) => {
                 experience: profile.experience || 0,
                 gold: profile.gold || 0,
                 race: normalizeRace(profile.race) || null,
-                race_title: profile.race_title || 'Aventurero',
+                race_title: calcularTitulo(profile.race, profile.level || 1) || profile.race_title || 'Aventurero',
                 achievements: profile.achievements || []
             }
         });
