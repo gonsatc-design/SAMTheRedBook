@@ -1315,10 +1315,13 @@ function switchTab(targetId) {
     });
 
     // 3. Lógica Específica de cada Tab
+    const samReply = document.getElementById('samReplyContainer');
     if (targetId === 'journal') {
         chatFooter.classList.remove('hidden');
+        if (samReply) samReply.classList.remove('hidden');
     } else {
         chatFooter.classList.add('hidden');
+        if (samReply) samReply.classList.add('hidden');
     }
 
     if (targetId === 'warRoom') {
