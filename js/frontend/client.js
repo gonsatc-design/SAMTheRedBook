@@ -80,7 +80,6 @@ function getLevelFromXP(totalXP) {
 
 // --- CONTROL GLOBAL ---
 let raceModalShownOnce = false;  // Bandera para mostrar modal solo una vez
-let cachedAchievements = null;   // Cache local para evitar re-query con datos viejos
 
 function normalizeRaceClient(race) {
     const map = {
@@ -2082,12 +2081,8 @@ async function renderDedicatedAchievements(preloadedAchievements) {
         // Si tenemos los achievements del backend en la respuesta, usarlos directamente
         if (preloadedAchievements !== undefined && preloadedAchievements !== null) {
             unlockedIds = Array.isArray(preloadedAchievements) ? preloadedAchievements : [];
-            cachedAchievements = unlockedIds; // Actualizar cache
-        } else if (cachedAchievements !== null) {
-            // Usar cache local si lo tenemos (evita re-query con datos viejos al cambiar de tab)
-            unlockedIds = cachedAchievements;
         } else {
-            // Fallback: consultar Supabase solo si no hay cache
+            // Consultar Supabase siempre al entrar en la sección
             await actualizarPerfilUsuario();
             const { data: profile } = await samClient.from('profiles').select('achievements').single();
             let unlockedRaw = profile?.achievements || {};
@@ -2105,7 +2100,6 @@ async function renderDedicatedAchievements(preloadedAchievements) {
                     unlockedIds = [];
                 }
             }
-            cachedAchievements = unlockedIds; // Actualizar cache con datos frescos de Supabase
         }
 
         const allLogros = [
