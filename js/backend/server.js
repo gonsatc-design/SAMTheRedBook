@@ -27,6 +27,30 @@ app.use(express.static('.'));
 let globalFuryActive = false;
 let globalDebuffActive = false;
 
+// === SISTEMA DE XP CON CURVA PROGRESIVA ===
+// Objetivo: lv 99 alcanzable en ~3 meses a 3 tareas/día (225 XP/día)
+function getXPThresholdForLevel(level) {
+    if (level <= 5)  return 80;   // Lv 1-5: enganche rápido
+    if (level <= 15) return 120;  // Lv 6-15
+    if (level <= 30) return 160;  // Lv 16-30
+    if (level <= 50) return 200;  // Lv 31-50
+    if (level <= 70) return 230;  // Lv 51-70
+    return 260;                   // Lv 71-99
+}
+
+function getLevelFromXP(totalXP) {
+    let level = 1;
+    let accumulated = 0;
+    while (level < 99) {
+        const threshold = getXPThresholdForLevel(level);
+        if (accumulated + threshold > totalXP) break;
+        accumulated += threshold;
+        level++;
+    }
+    return level;
+}
+// ===========================================
+
 const TITULOS_EVOLUCION = {
     'Humano': {
         1: 'Granjero', 8: 'Aventurero', 18: 'Montaraz', 25: 'Soldado',
@@ -367,7 +391,7 @@ app.post('/api/gandalf/judge', authMiddleware, async (req, res) => {
         if (successIds.length > 0) {
             // 🧠 CALCULAR BUFFS DE XP
             const modifiers = await obtenerModificadores(userId);
-            const baseXP = 10;
+            const baseXP = 75;
             xpFinal = baseXP * (modifiers.buff_xp || 1);
 
             // 🎁 OBTENER DETALLES DE TAREAS PARA GENERAR RECOMPENSAS ANTES
@@ -446,7 +470,7 @@ app.post('/api/gandalf/judge', authMiddleware, async (req, res) => {
 
                 if (profile) {
                     const newExp = (profile.experience || 0) + totalXP;
-                    const newLevel = Math.floor(newExp / 1000) + 1;
+                    const newLevel = getLevelFromXP(newExp);
 
                     const { error: updateError } = await supabase
                         .from('profiles')

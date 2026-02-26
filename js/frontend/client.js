@@ -52,6 +52,22 @@ const raceModalTitle = document.getElementById('raceModalTitle');
 const raceModalSubtitle = document.getElementById('raceModalSubtitle');
 const changeRaceBtn = document.getElementById('changeRaceBtn');
 
+// === SISTEMA DE XP: MISMA CURVA QUE EL BACKEND ===
+function getXPThresholdForLevel(level) {
+    if (level <= 5)  return 80;
+    if (level <= 15) return 120;
+    if (level <= 30) return 160;
+    if (level <= 50) return 200;
+    if (level <= 70) return 230;
+    return 260;
+}
+function getXPInCurrentLevel(totalXP, currentLevel) {
+    let accumulated = 0;
+    for (let l = 1; l < currentLevel; l++) accumulated += getXPThresholdForLevel(l);
+    return totalXP - accumulated;
+}
+// ==================================================
+
 // --- CONTROL GLOBAL ---
 let raceModalShownOnce = false;  // Bandera para mostrar modal solo una vez
 let cachedAchievements = null;   // Cache local para evitar re-query con datos viejos
@@ -1055,12 +1071,12 @@ async function actualizarPerfilUsuario() {
             if (document.getElementById('playerRace')) document.getElementById('playerRace').innerText = normalizeRaceClient(p.race) || 'Sin Raza';
             if (playerGold) playerGold.innerText = `💰 ${p.gold.toLocaleString()} Oro`;
 
-            // Actualizar Barra de XP (1000 XP por nivel)
+            // Actualizar Barra de XP (curva progresiva)
             const playerXPBar = document.getElementById('playerXPBar');
             if (playerXPBar) {
-                const xpCurrentLevel = p.experience % 1000;
-                const progress = (xpCurrentLevel / 1000) * 100;
-                playerXPBar.style.width = `${progress}%`;
+                const xpCurrentLevel = getXPInCurrentLevel(p.experience, p.level);
+                const xpNeeded = getXPThresholdForLevel(p.level);
+                playerXPBar.style.width = `${Math.min(100, (xpCurrentLevel / xpNeeded) * 100)}%`;
             }
 
             // Icono de raza en perfil
@@ -1529,10 +1545,10 @@ async function loadProfile() {
             if (profileRaceIcon) profileRaceIcon.innerText = getRaceIcon(p.race);
             if (journeyRaceIcon) journeyRaceIcon.innerText = getRaceIcon(p.race);
 
-            // BARRA DE XP
-            const xpCurrentLevel = (p.experience || 0) % 1000;
-            const xpForNextLevel = 1000;
-            const xpProgress = (xpCurrentLevel / xpForNextLevel) * 100;
+            // BARRA DE XP (curva progresiva)
+            const xpCurrentLevel = getXPInCurrentLevel(p.experience || 0, p.level || 1);
+            const xpForNextLevel = getXPThresholdForLevel(p.level || 1);
+            const xpProgress = Math.min(100, (xpCurrentLevel / xpForNextLevel) * 100);
 
             const xpBar = document.getElementById('profileXPBarLarge');
             if (xpBar) {
@@ -2321,11 +2337,12 @@ function actualizarUIConNuevosDatos(newExp, newLevel) {
     const playerLevel = document.getElementById('playerLevel');
     if (playerLevel) playerLevel.innerText = `NIVEL ${newLevel}`;
 
-    // Actualizar Barra de XP (1000 XP por nivel)
+    // Actualizar Barra de XP (curva por tramos)
     const playerXPBar = document.getElementById('playerXPBar');
     if (playerXPBar) {
-        const xpCurrentLevel = newExp % 1000;
-        const progress = (xpCurrentLevel / 1000) * 100;
+        const xpCurrentLevel = getXPInCurrentLevel(newExp, newLevel);
+        const xpForNextLevel = getXPThresholdForLevel(newLevel);
+        const progress = (xpCurrentLevel / xpForNextLevel) * 100;
         playerXPBar.style.width = `${progress}%`;
     }
 
@@ -2335,8 +2352,8 @@ function actualizarUIConNuevosDatos(newExp, newLevel) {
         const profileLevel = document.getElementById('profileLevel');
         if (profileLevel) profileLevel.innerText = newLevel;
 
-        const xpCurrentLevel = newExp % 1000;
-        const xpForNextLevel = 1000;
+        const xpCurrentLevel = getXPInCurrentLevel(newExp, newLevel);
+        const xpForNextLevel = getXPThresholdForLevel(newLevel);
         const xpProgress = (xpCurrentLevel / xpForNextLevel) * 100;
 
         const xpBar = document.getElementById('profileXPBarLarge');
