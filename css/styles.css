@@ -3,10 +3,14 @@
    Estilos principales
    ===================================================== */
 
+/* === TIPOGRAFÍA: CINZEL (épica) + LORA (cuerpo) === */
+/* Cinzel: inscripción de piedra / romano épico  → títulos, labels, uppercase */
+/* Lora:   serif elegante tipo libro antiguo     → cuerpo de texto             */
+
 body {
     background-color: #0f172a;
     color: #e2e8f0;
-    font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Lora', Georgia, 'Times New Roman', serif;
     font-size: 15px;
     position: relative;
     background-image:
@@ -459,4 +463,30 @@ canvas {
 
 .guide-panel {
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.96));
+}
+
+/* === MOBILE: height uses svh (Small Viewport Height) so browser chrome never covers nav ===
+   h-[92svh] is set directly in HTML; no further overrides needed here */
+
+/* === CINZEL: títulos, headers, nav labels, uppercase epic text === */
+h1, h2, h3, h4,
+.nav-btn span:last-child,
+.sam-input::placeholder {
+    font-family: 'Cinzel', 'Times New Roman', serif;
+}
+
+/* Cinzel tiene métricas más altas que Inter: forzar line-height compacto en nav */
+.nav-btn span:last-child {
+    line-height: 1;
+}
+
+/* Header principal S.A.M. EL LIBRO ROJO */
+header h1 {
+    font-family: 'Cinzel', 'Times New Roman', serif;
+    letter-spacing: 0.15em;
+}
+
+/* Clases de utilidad para Cinzel (usado en textos uppercase del JS) */
+.font-cinzel {
+    font-family: 'Cinzel', 'Times New Roman', serif;
 }

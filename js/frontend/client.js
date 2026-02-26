@@ -36,6 +36,7 @@ const samReplyContainer = document.getElementById('samReplyContainer');
 const gandalfModal = document.getElementById('gandalfModal');
 const gandalfTaskList = document.getElementById('gandalfTaskList');
 const sellarJuicioBtn = document.getElementById('sellarJuicioBtn');
+const cerrarJuicioBtn = document.getElementById('cerrarJuicioBtn');
 // Elementos del Palantír
 const palantirOrb = document.getElementById('palantirOrb');
 const palantirAlerta = document.getElementById('palantirAlerta');
@@ -50,6 +51,22 @@ const raceSelectionModal = document.getElementById('raceSelectionModal');
 const raceModalTitle = document.getElementById('raceModalTitle');
 const raceModalSubtitle = document.getElementById('raceModalSubtitle');
 const changeRaceBtn = document.getElementById('changeRaceBtn');
+
+// === SISTEMA DE XP: MISMA CURVA QUE EL BACKEND ===
+function getXPThresholdForLevel(level) {
+    if (level <= 5)  return 80;
+    if (level <= 15) return 120;
+    if (level <= 30) return 160;
+    if (level <= 50) return 200;
+    if (level <= 70) return 230;
+    return 260;
+}
+function getXPInCurrentLevel(totalXP, currentLevel) {
+    let accumulated = 0;
+    for (let l = 1; l < currentLevel; l++) accumulated += getXPThresholdForLevel(l);
+    return totalXP - accumulated;
+}
+// ==================================================
 
 // --- CONTROL GLOBAL ---
 let raceModalShownOnce = false;  // Bandera para mostrar modal solo una vez
@@ -176,6 +193,16 @@ function obtenerFraseSamAleatoria() {
 }
 async function cargarMisiones(mockDate = null) {
     try {
+        // Show loading state immediately so we never flash stale "No hay misiones activas"
+        taskContainer.innerHTML = `
+            <div class="flex items-center justify-center gap-3 text-xs text-amber-500/50 italic p-8 mt-8">
+                <svg class="animate-spin h-5 w-5 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Consultando el Libro Rojo...</span>
+            </div>
+        `;
         const token = await obtenerToken();
         if (!token) {
             taskContainer.innerHTML = `
@@ -765,13 +792,18 @@ async function enviarChat() {
             }, 2000); // 2 segundos de respiro
         } else {
             // Si falla, mostramos el error que pueda venir del backend
-            const errorMsg = data.error || "La respuesta de Sam se perdió en el viento. Prueba otra vez";
+            const errorMsg = data.error || "La respuesta de Sam se perdió entre las sombras... pero los Hobbits no se rinden. ¡El Libro Rojo sigue en pie! Prueba de nuevo, ¡la gesta te espera!";
             mostrarRespuestaSam([{ reply: errorMsg }]);
         }
     } catch (err) {
         console.error(err);
-        tempMsg.innerText = "❌ Error al contactar con Sam.";
-        tempMsg.className = "text-xs text-red-500 p-2";
+        tempMsg.innerHTML = `
+            <div class="text-center p-3">
+                <p class="text-sm font-bold text-red-400 mb-1">⚔️ Sam no pudo conectar con el servidor</p>
+                <p class="text-xs text-slate-400 leading-relaxed">El servidor puede estar despertando de su descanso. Los grandes héroes no se rinden ante el primer obstáculo: <span class="text-amber-400 font-bold">¡vuelve a intentarlo en unos segundos!</span></p>
+            </div>
+        `;
+        tempMsg.className = "text-center";
     }
 }
 
@@ -788,12 +820,12 @@ function activarJuicioGandalf(tareas) {
 
     tareas.forEach(tarea => {
         const div = document.createElement('div');
-        div.className = "p-3 bg-amber-100/50 rounded-md flex justify-between items-center";
+        div.className = "p-3 bg-amber-100/60 rounded-md";
         div.innerHTML = `
-            <span class="font-bold">${tarea.titulo_epico}</span>
+            <p class="font-bold text-amber-950 text-sm leading-snug mb-2">${tarea.titulo_epico}</p>
             <div class="flex gap-2" data-task-id="${tarea.id}">
-                <button class="gandalf-choice-btn bg-green-800 text-white px-3 py-1 rounded" data-verdict="exito">Éxito</button>
-                <button class="gandalf-choice-btn bg-red-800 text-white px-3 py-1 rounded" data-verdict="fracaso">Fracaso</button>
+                <button class="gandalf-choice-btn flex-1 bg-green-800 text-white px-3 py-2 rounded font-bold text-xs transition-all duration-200" data-verdict="exito">⚔️ Éxito</button>
+                <button class="gandalf-choice-btn flex-1 bg-red-900 text-white px-3 py-2 rounded font-bold text-xs transition-all duration-200" data-verdict="fracaso">💀 Fracaso</button>
             </div>
         `;
         gandalfTaskList.appendChild(div);
@@ -806,11 +838,16 @@ gandalfTaskList.addEventListener('click', (e) => {
         const verdict = e.target.dataset.verdict;
         juiciosPendientes[taskId] = verdict;
 
-        // Feedback visual
+        // Feedback visual: seleccionado brilla, el otro se atenúa
         e.target.parentElement.querySelectorAll('.gandalf-choice-btn').forEach(btn => {
-            btn.classList.remove('ring-4', 'ring-white');
+            if (btn === e.target) {
+                btn.classList.remove('opacity-30', 'scale-95');
+                btn.classList.add('ring-2', 'ring-white', 'scale-105', 'shadow-lg', 'brightness-125');
+            } else {
+                btn.classList.remove('ring-2', 'ring-white', 'scale-105', 'shadow-lg', 'brightness-125');
+                btn.classList.add('opacity-30', 'scale-95');
+            }
         });
-        e.target.classList.add('ring-4', 'ring-white');
     }
 });
 
@@ -819,12 +856,25 @@ sellarJuicioBtn.addEventListener('click', async () => {
     const failureIds = Object.keys(juiciosPendientes).filter(id => juiciosPendientes[id] === 'fracaso');
 
     if (successIds.length === 0 && failureIds.length === 0) {
-        alert("Debes emitir un juicio para cada asunto.");
+        alert("Debes emitir un juicio para cada asunto pendiente.");
         return;
     }
 
     const token = await obtenerToken();
     if (!token) return;
+
+    // Bloquear toda la UI del juicio mientras procesa
+    sellarJuicioBtn.disabled = true;
+    sellarJuicioBtn.innerHTML = `
+        <span class="flex items-center justify-center gap-2">
+            <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Sellando el Juicio...
+        </span>`;
+    document.querySelectorAll('.gandalf-choice-btn').forEach(b => b.disabled = true);
+    if (cerrarJuicioBtn) cerrarJuicioBtn.disabled = true;
 
     try {
         await fetch(`${API_BASE}/api/gandalf/judge`, {
@@ -837,12 +887,27 @@ sellarJuicioBtn.addEventListener('click', async () => {
         chatInput.disabled = false;
         chatInput.placeholder = "Escribe tu gesta aquí...";
         autoResizeChatInput();
-        cargarMisiones(); // Recargamos para ver el resultado
+        cargarMisiones();
     } catch (err) {
         console.error("Error al sellar el juicio:", err);
+        // Restaurar botón si falla
+        sellarJuicioBtn.disabled = false;
+        sellarJuicioBtn.innerHTML = 'Sellar el Juicio';
+        document.querySelectorAll('.gandalf-choice-btn').forEach(b => b.disabled = false);
+        if (cerrarJuicioBtn) cerrarJuicioBtn.disabled = false;
     }
 });
 
+
+// Cerrar el recordatorio sin resolver (el usuario lo hará desde las tarjetas)
+if (cerrarJuicioBtn) {
+    cerrarJuicioBtn.addEventListener('click', () => {
+        gandalfModal.classList.add('hidden');
+        chatInput.disabled = false;
+        chatInput.placeholder = "Escribe tu gesta aquí...";
+        autoResizeChatInput();
+    });
+}
 
 // --- JUICIO DE GANDALF (ACTUALIZADO) ---
 window.juicioGandalf = async (id, veredicto) => {
@@ -1002,16 +1067,16 @@ async function actualizarPerfilUsuario() {
 
             // Actualizar HUD
             if (playerLevel) playerLevel.innerText = `NIVEL ${p.level}`;
-            if (playerTitle) playerTitle.innerText = p.race_title || 'Aventurero';
+            if (playerTitle) playerTitle.innerText = p.race_title || 'Aventurero/a';
             if (document.getElementById('playerRace')) document.getElementById('playerRace').innerText = normalizeRaceClient(p.race) || 'Sin Raza';
             if (playerGold) playerGold.innerText = `💰 ${p.gold.toLocaleString()} Oro`;
 
-            // Actualizar Barra de XP (1000 XP por nivel)
+            // Actualizar Barra de XP (curva progresiva)
             const playerXPBar = document.getElementById('playerXPBar');
             if (playerXPBar) {
-                const xpCurrentLevel = p.experience % 1000;
-                const progress = (xpCurrentLevel / 1000) * 100;
-                playerXPBar.style.width = `${progress}%`;
+                const xpCurrentLevel = getXPInCurrentLevel(p.experience, p.level);
+                const xpNeeded = getXPThresholdForLevel(p.level);
+                playerXPBar.style.width = `${Math.min(100, (xpCurrentLevel / xpNeeded) * 100)}%`;
             }
 
             // Icono de raza en perfil
@@ -1042,8 +1107,8 @@ function cargarLogrosUsuario(unlockedIds) {
     // Expandimos el mock de logros para el perfil con info de obtención
     const mockLogros = [
         { id: 'tasks_1', name: 'Primer Paso', icon: '🦶', desc: 'Completa tu primera misión', target: 1, category: 'tasks' },
-        { id: 'tasks_10', name: 'Aventurero Local', icon: '📜', desc: 'Completa 10 misiones', target: 10, category: 'tasks' },
-        { id: 'tasks_25', name: 'Héroe de la Comarca', icon: '🍺', desc: 'Completa 25 misiones', target: 25, category: 'tasks' },
+        { id: 'tasks_10', name: 'Aventurero/a Local', icon: '📜', desc: 'Completa 10 misiones', target: 10, category: 'tasks' },
+        { id: 'tasks_25', name: 'Héroe/Heroína de la Comarca', icon: '🍺', desc: 'Completa 25 misiones', target: 25, category: 'tasks' },
         { id: 'salud_5', name: 'Vigía de la Salud', icon: '💚', desc: 'Completa 5 misiones de Salud', target: 5, category: 'salud' },
         { id: 'estudio_10', name: 'Escriba de Minas Tirith', icon: '📖', desc: 'Completa 10 misiones de Estudio', target: 10, category: 'estudio' },
         { id: 'damage_1k', name: 'Pequeña Espina', icon: '🗡️', desc: 'Inflige 1,000 de daño a Sauron', target: 1000, category: 'damage' },
@@ -1130,7 +1195,7 @@ function openRaceSelectionModal(mode = 'onboarding') {
         if (raceModalTitle) raceModalTitle.innerText = 'RITO DE TRANSFIGURACIÓN';
         if (raceModalSubtitle) raceModalSubtitle.innerText = `Cambiar de raza cuesta ${RACE_CHANGE_COST.toLocaleString()} de oro. Es una decisión casi irreversible.`;
     } else {
-        if (raceModalTitle) raceModalTitle.innerText = '¿ERES EL PORTADOR DEL ANILLO?';
+        if (raceModalTitle) raceModalTitle.innerText = '¿ERES EL/LA PORTADOR/A DEL ANILLO?';
         if (raceModalSubtitle) raceModalSubtitle.innerText = 'Solo Sam (S.A.M.) te acompaña y registrará tus gestas. En tus manos está el destino.';
     }
 
@@ -1480,10 +1545,10 @@ async function loadProfile() {
             if (profileRaceIcon) profileRaceIcon.innerText = getRaceIcon(p.race);
             if (journeyRaceIcon) journeyRaceIcon.innerText = getRaceIcon(p.race);
 
-            // BARRA DE XP
-            const xpCurrentLevel = (p.experience || 0) % 1000;
-            const xpForNextLevel = 1000;
-            const xpProgress = (xpCurrentLevel / xpForNextLevel) * 100;
+            // BARRA DE XP (curva progresiva)
+            const xpCurrentLevel = getXPInCurrentLevel(p.experience || 0, p.level || 1);
+            const xpForNextLevel = getXPThresholdForLevel(p.level || 1);
+            const xpProgress = Math.min(100, (xpCurrentLevel / xpForNextLevel) * 100);
 
             const xpBar = document.getElementById('profileXPBarLarge');
             if (xpBar) {
@@ -1717,7 +1782,8 @@ function actualizarVisualRaid(status) {
 
     const remainingPercent = Math.max(0, Math.min(100, Number(percent)));
     sauronHPBar.style.width = `${remainingPercent}%`;
-    sauronHPText.innerText = `${remainingPercent.toFixed(1)}% restante`;
+    const pasos = Math.round(remainingPercent * 1000);
+    sauronHPText.innerText = `${pasos.toLocaleString('es-ES')} pasos restantes`;
     if (bossName) bossName.innerText = 'Distancia hasta llegar al Monte del Destino';
     if (bossIcon) bossIcon.innerText = '🌋';
     if (journeyProgressMarker) journeyProgressMarker.style.left = `${remainingPercent}%`;
@@ -2271,11 +2337,12 @@ function actualizarUIConNuevosDatos(newExp, newLevel) {
     const playerLevel = document.getElementById('playerLevel');
     if (playerLevel) playerLevel.innerText = `NIVEL ${newLevel}`;
 
-    // Actualizar Barra de XP (1000 XP por nivel)
+    // Actualizar Barra de XP (curva por tramos)
     const playerXPBar = document.getElementById('playerXPBar');
     if (playerXPBar) {
-        const xpCurrentLevel = newExp % 1000;
-        const progress = (xpCurrentLevel / 1000) * 100;
+        const xpCurrentLevel = getXPInCurrentLevel(newExp, newLevel);
+        const xpForNextLevel = getXPThresholdForLevel(newLevel);
+        const progress = (xpCurrentLevel / xpForNextLevel) * 100;
         playerXPBar.style.width = `${progress}%`;
     }
 
@@ -2285,8 +2352,8 @@ function actualizarUIConNuevosDatos(newExp, newLevel) {
         const profileLevel = document.getElementById('profileLevel');
         if (profileLevel) profileLevel.innerText = newLevel;
 
-        const xpCurrentLevel = newExp % 1000;
-        const xpForNextLevel = 1000;
+        const xpCurrentLevel = getXPInCurrentLevel(newExp, newLevel);
+        const xpForNextLevel = getXPThresholdForLevel(newLevel);
         const xpProgress = (xpCurrentLevel / xpForNextLevel) * 100;
 
         const xpBar = document.getElementById('profileXPBarLarge');
