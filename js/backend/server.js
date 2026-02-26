@@ -494,17 +494,24 @@ app.post('/api/gandalf/judge', authMiddleware, async (req, res) => {
         }
 
         // �🛡️ PROTOCOLO DE INCURSIÓN: PROCESAR DAÑO GLOBAL
-        // 🏆 PROCESAR DAÑO GLOBAL + LOGROS (síncronos para incluir resultado en respuesta)
+        // 🏆 LOGROS: síncronos para incluirlos en la respuesta (necesario para UI inmediata)
+        // 🌍 DAÑO GLOBAL: en background, no bloquea la respuesta al usuario
         let newAchievements = null;
         if (successIds.length > 0) {
             try {
-                await procesarDanioGlobal(userId, successIds);
-                checkGlobalFury();
-                // Verificar logros ANTES de responder para incluirlos en la respuesta
                 newAchievements = await checkAchievements(userId);
             } catch (e) {
-                console.error("❌ Error en Protocolo de Incursión:", e.message);
+                console.error("❌ Error al verificar logros:", e.message);
             }
+            // procesarDanioGlobal y checkGlobalFury en background: no bloquean la respuesta
+            setImmediate(async () => {
+                try {
+                    await procesarDanioGlobal(userId, successIds);
+                    checkGlobalFury();
+                } catch (e) {
+                    console.error("❌ Error en daño global:", e.message);
+                }
+            });
         }
 
         // ✅ RESPUESTA CON RECOMPENSAS Y LOGROS INCLUIDOS
