@@ -1525,9 +1525,10 @@ async function loadProfile() {
         if (data.success && data.profile) {
             const p = data.profile;
 
-            // Cargar nickname si existe, si no mostrar apodo genérico (no el email)
+            // Mostrar nickname si existe, si no usar el nombre de usuario (sin @comarca.com)
             if (document.getElementById('profileEmail')) {
-                document.getElementById('profileEmail').innerText = p.nickname || 'Portador/a sin nombre';
+                const username = (p.email || '').replace('@comarca.com', '');
+                document.getElementById('profileEmail').innerText = p.nickname || username || 'Portador/a';
             }
 
             // Actualizar Nivel, ORO, Raza (con validación de elementos)
