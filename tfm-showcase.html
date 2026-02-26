@@ -197,15 +197,20 @@
 
         .grid-cards {
             display: grid;
-            /* auto-fit: se adapta al ancho del contenedor, no del viewport.
-               Con minmax(260px, 1fr): si el contenedor < 520px → 1 col; si > 520px → 2 col */
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 12px;
         }
 
         /* span-2: siempre ocupa todas las columnas disponibles */
         .card.span-2 {
             grid-column: 1 / -1;
+        }
+
+        /* 1 columna en cualquier pantalla no-PC (móvil y tablet) */
+        @media (max-width: 979px) {
+            .grid-cards {
+                grid-template-columns: 1fr !important;
+            }
         }
 
         .card {
