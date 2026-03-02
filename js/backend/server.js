@@ -1539,7 +1539,7 @@ async function checkAchievements(userId) {
 
     } catch (error) {
         console.error("❌ Error al verificar logros:", error.message);
-        return [];
+        return null; // null = error, [] = usuario sin logros (distinción importante para el frontend)
     }
 }
 

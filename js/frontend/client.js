@@ -2094,12 +2094,15 @@ async function renderDedicatedAchievements(preloadedAchievements) {
         let unlockedIds = [];
 
         // Si tenemos los achievements del backend en la respuesta, usarlos directamente
-        if (preloadedAchievements !== undefined && preloadedAchievements !== null) {
-            unlockedIds = Array.isArray(preloadedAchievements) ? preloadedAchievements : [];
+        // IMPORTANTE: null = error en backend (preservar grid), [] = sin logros (válido)
+        if (Array.isArray(preloadedAchievements)) {
+            unlockedIds = preloadedAchievements;
         } else {
             // Usar los datos ya obtenidos por actualizarPerfilUsuario (Bearer token, fiable en móvil)
             const fetched = await actualizarPerfilUsuario();
-            unlockedIds = Array.isArray(fetched) ? fetched : [];
+            // Si falla (sesión expirada, red), no sobreescribir el grid con estado vacío
+            if (!Array.isArray(fetched)) return;
+            unlockedIds = fetched;
         }
 
         const allLogros = [
