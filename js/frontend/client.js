@@ -1117,6 +1117,8 @@ async function actualizarPerfilUsuario() {
             if (profileBtn && profileBtn.classList.contains('text-yellow-400')) {
                 await loadProfile();  // Recargar datos del PERFIL
             }
+
+            return unlockedIds;
         }
     } catch (e) {
         console.error("Error al cargar perfil RPG:", e);
@@ -2095,24 +2097,9 @@ async function renderDedicatedAchievements(preloadedAchievements) {
         if (preloadedAchievements !== undefined && preloadedAchievements !== null) {
             unlockedIds = Array.isArray(preloadedAchievements) ? preloadedAchievements : [];
         } else {
-            // Consultar Supabase siempre al entrar en la sección
-            await actualizarPerfilUsuario();
-            const { data: profile } = await samClient.from('profiles').select('achievements').single();
-            let unlockedRaw = profile?.achievements || {};
-
-            // IMPORTANTE: Validar y limpiar achievements
-            if (Array.isArray(unlockedRaw)) {
-                unlockedIds = unlockedRaw;
-            } else if (typeof unlockedRaw === 'object' && unlockedRaw !== null) {
-                unlockedIds = Object.keys(unlockedRaw);
-            } else if (typeof unlockedRaw === 'string') {
-                try {
-                    unlockedIds = JSON.parse(unlockedRaw);
-                    if (!Array.isArray(unlockedIds)) unlockedIds = [];
-                } catch {
-                    unlockedIds = [];
-                }
-            }
+            // Usar los datos ya obtenidos por actualizarPerfilUsuario (Bearer token, fiable en móvil)
+            const fetched = await actualizarPerfilUsuario();
+            unlockedIds = Array.isArray(fetched) ? fetched : [];
         }
 
         const allLogros = [
