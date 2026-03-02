@@ -903,6 +903,9 @@ app.post('/api/forge/craft', authMiddleware, async (req, res) => {
 
         if (insertError) throw insertError;
 
+        // Verificar logros de forja en background
+        checkAchievements(userId).catch(e => console.error("❌ Error al verificar logros tras forja:", e.message));
+
         res.json({
             success: true,
             message: `¡Has forjado el ${recetaNombre}! El martillo de Durin canta con tu éxito.`,
@@ -1357,7 +1360,20 @@ app.get('/api/achievements/progress', authMiddleware, async (req, res) => {
 
         const totalTasks = completedTasks.length;
 
-        // 3. Define all achievements and their requirements
+        // 3. Fetch forge, legendary, damage and level data in parallel
+        const [forgeResult, legendaryResult, damageResult, profileResult] = await Promise.all([
+            supabase.from('inventory').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('category_context', 'forge'),
+            supabase.from('inventory').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('category_context', 'forge').eq('rarity', 'Legendario'),
+            supabase.from('raid_logs').select('damage').eq('user_id', userId),
+            supabase.from('profiles').select('level').eq('id', userId).single()
+        ]);
+
+        const forgeCount = forgeResult.count || 0;
+        const legendaryCount = legendaryResult.count || 0;
+        const totalDamage = (damageResult.data || []).reduce((sum, row) => sum + (row.damage || 0), 0);
+        const userLevel = profileResult.data?.level || 0;
+
+        // 4. Define all achievements and their requirements
         const achievements = {
             tasks_1: { current: Math.min(totalTasks, 1), target: 1 },
             tasks_10: { current: Math.min(totalTasks, 10), target: 10 },
@@ -1366,7 +1382,14 @@ app.get('/api/achievements/progress', authMiddleware, async (req, res) => {
             estudio_10: { current: Math.min(categoryCounts['estudio'] ?? 0, 10), target: 10 },
             trabajo_5: { current: Math.min(categoryCounts['trabajo'] ?? 0, 5), target: 5 },
             hogar_5: { current: Math.min(categoryCounts['hogar'] ?? 0, 5), target: 5 },
-            ocio_5: { current: Math.min(categoryCounts['ocio'] ?? 0, 5), target: 5 }
+            ocio_5: { current: Math.min(categoryCounts['ocio'] ?? 0, 5), target: 5 },
+            forge_1: { current: Math.min(forgeCount, 1), target: 1 },
+            forge_10: { current: Math.min(forgeCount, 10), target: 10 },
+            legendary_1: { current: Math.min(legendaryCount, 1), target: 1 },
+            legendary_5: { current: Math.min(legendaryCount, 5), target: 5 },
+            damage_1k: { current: Math.min(totalDamage, 1000), target: 1000 },
+            damage_10k: { current: Math.min(totalDamage, 10000), target: 10000 },
+            level_50: { current: Math.min(userLevel, 50), target: 50 }
         };
 
         console.log(`[Achievements Progress] User: ${userId}`, { total: totalTasks, ...categoryCounts });
@@ -1468,6 +1491,40 @@ async function checkAchievements(userId) {
         if (profile.level >= 50 && !newAchievements.includes('level_50')) {
             newAchievements.push('level_50');
             console.log(`🏆 LOGRO DESBLOQUEADO: level_50 (SAGRADO) para ${userId}`);
+        }
+
+        // LOGROS DE FORJA
+        const { count: forgeCount } = await supabase.from('inventory').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('category_context', 'forge');
+        if (forgeCount >= 1 && !newAchievements.includes('forge_1')) {
+            newAchievements.push('forge_1');
+            console.log(`🏆 LOGRO DESBLOQUEADO: forge_1 (APRENDIZ DE HERRERO) para ${userId}`);
+        }
+        if (forgeCount >= 10 && !newAchievements.includes('forge_10')) {
+            newAchievements.push('forge_10');
+            console.log(`🏆 LOGRO DESBLOQUEADO: forge_10 (MAESTRO FORJADOR) para ${userId}`);
+        }
+
+        // LOGROS LEGENDARIOS
+        const { count: legendaryCount } = await supabase.from('inventory').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('category_context', 'forge').eq('rarity', 'Legendario');
+        if (legendaryCount >= 1 && !newAchievements.includes('legendary_1')) {
+            newAchievements.push('legendary_1');
+            console.log(`🏆 LOGRO DESBLOQUEADO: legendary_1 (CAZADOR DE LEYENDAS) para ${userId}`);
+        }
+        if (legendaryCount >= 5 && !newAchievements.includes('legendary_5')) {
+            newAchievements.push('legendary_5');
+            console.log(`🏆 LOGRO DESBLOQUEADO: legendary_5 (LEYENDA VIVIENTE) para ${userId}`);
+        }
+
+        // LOGROS DE DAÑO A SAURON
+        const { data: damageData } = await supabase.from('raid_logs').select('damage').eq('user_id', userId);
+        const totalDamage = (damageData || []).reduce((sum, row) => sum + (row.damage || 0), 0);
+        if (totalDamage >= 1000 && !newAchievements.includes('damage_1k')) {
+            newAchievements.push('damage_1k');
+            console.log(`🏆 LOGRO DESBLOQUEADO: damage_1k (PEQUEÑA ESPINA) para ${userId}`);
+        }
+        if (totalDamage >= 10000 && !newAchievements.includes('damage_10k')) {
+            newAchievements.push('damage_10k');
+            console.log(`🏆 LOGRO DESBLOQUEADO: damage_10k (MUERTE NEGRA) para ${userId}`);
         }
 
         // Actualizar si hay cambios
